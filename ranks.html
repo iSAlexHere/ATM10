@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Ranks & Progression | ATM10</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f1115;
+            color: #d1d5db;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: #1c1f26;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid #2d313d;
+        }
+        h1 { text-align: center; color: #ffffff; margin-bottom: 5px; font-size: 2.5em; }
+        p.subtitle { text-align: center; color: #6b7280; margin-bottom: 40px; font-size: 1.1em; }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: #252932;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th {
+            background-color: #2d323e;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1.5px;
+            padding: 20px 15px;
+            text-align: left;
+            border-bottom: 2px solid #1c1f26;
+        }
+        td {
+            padding: 18px 15px;
+            text-align: left;
+            border-bottom: 1px solid #2d313d;
+            font-size: 0.95em;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #2a2e3a; }
+        
+        /* Rank Color Classes (Matching In-Game Codes) */
+        .r-member { color: #555555; font-weight: bold; } /* &8 */
+        .r-novice { color: #aaaaaa; font-weight: bold; } /* &7 */
+        .r-apprentice { color: #ffffff; font-weight: bold; } /* &f */
+        .r-traveler { color: #ffff55; font-weight: bold; } /* &e */
+        .r-explorer { color: #ffaa00; font-weight: bold; } /* &6 */
+        .r-scout { color: #55ff55; font-weight: bold; } /* &a */
+        .r-gatherer { color: #00aa00; font-weight: bold; } /* &2 */
+        .r-builder { color: #55ffff; font-weight: bold; } /* &b */
+        .r-engineer { color: #00aaaa; font-weight: bold; } /* &3 */
+        .r-artisan { color: #ff55ff; font-weight: bold; } /* &d */
+        .r-veteran { color: #aa00aa; font-weight: bold; } /* &5 */
+        .r-legend { color: #ffaa00; font-weight: bold; text-decoration: underline; } /* &6&l */
+        .r-atmaker { color: #aa00aa; font-weight: bold; text-transform: uppercase; text-shadow: 0 0 10px rgba(170, 0, 170, 0.5); } /* &5&l */
+
+        .benefit-tag {
+            background: #111827;
+            color: #93c5fd;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            border: 1px solid #1e3a8a;
+            white-space: nowrap;
+        }
+        .cmd { color: #fbbf24; font-family: monospace; }
+        .highlight { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>All the Mods 10</h1>
+    <p class="subtitle">Automatic Rank Progression System</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank Name</th>
+                <th>Time Required</th>
+                <th>Commands & Features</th>
+                <th>Base Protection</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="r-member">[Member]</td>
+                <td>0 min</td>
+                <td><span class="cmd">/spawn</span>, <span class="cmd">/tpa</span>, 10 Homes</td>
+                <td>50 Claimed</td>
+            </tr>
+            <tr>
+                <td class="r-novice">[Novice]</td>
+                <td>15 min</td>
+                <td><span class="benefit-tag">Zero Cooldown</span> for Homes</td>
+                <td>75 Claimed</td>
+            </tr>
+            <tr>
+                <td class="r-apprentice">[Apprentice]</td>
+                <td>1 hour</td>
+                <td><span class="cmd">/back</span>, <span class="cmd">/trashcan</span></td>
+                <td>20 Homes</td>
+            </tr>
+            <tr>
+                <td class="r-traveler">[Traveler]</td>
+                <td>2 hours</td>
+                <td><span class="cmd">/waystones list</span></td>
+                <td>15 Priority</td>
+            </tr>
+            <tr>
+                <td class="r-explorer">[Explorer]</td>
+                <td>3 hours</td>
+                <td><span class="cmd">/rtp</span> (Random Teleport)</td>
+                <td>100 Claimed</td>
+            </tr>
+            <tr>
+                <td class="r-scout">[Scout]</td>
+                <td>5 hours</td>
+                <td><span class="benefit-tag">Instant Teleport</span>, <span class="cmd">/jump</span></td>
+                <td>No Warmup</td>
+            </tr>
+            <tr>
+                <td class="r-gatherer">[Gatherer]</td>
+                <td>10 hours</td>
+                <td>Portable Crafting Table (<span class="cmd">/open crafting</span>)</td>
+                <td>20 Force Loaded</td>
+            </tr>
+            <tr>
+                <td class="r-builder">[Builder]</td>
+                <td>15 hours</td>
+                <td>Portable Stonecutter (<span class="cmd">/open stonecutter</span>)</td>
+                <td>300 Claimed</td>
+            </tr>
+            <tr>
+                <td class="r-engineer">[Engineer]</td>
+                <td>20 hours</td>
+                <td><span class="highlight">Offline Chunkloading</span> (Base stays active)</td>
+                <td>30 Force Loaded</td>
+            </tr>
+            <tr>
+                <td class="r-artisan">[Artisan]</td>
+                <td>30 hours</td>
+                <td>Portable Anvil (<span class="cmd">/open anvil</span>), <span class="cmd">/nick</span></td>
+                <td>Custom Nicks</td>
+            </tr>
+            <tr>
+                <td class="r-veteran">[Veteran]</td>
+                <td>40 hours</td>
+                <td>Command <span class="cmd">/feed</span> (Instant hunger refill)</td>
+                <td>600 Claimed</td>
+            </tr>
+            <tr>
+                <td class="r-legend">[Legend]</td>
+                <td>60 hours</td>
+                <td><span class="cmd">/heal</span>, <span class="cmd">/hat</span> (Block on head)</td>
+                <td>100 Force Loaded</td>
+            </tr>
+            <tr>
+                <td class="r-atmaker">[ATM-MAKER]</td>
+                <td>100 hours</td>
+                <td><span class="highlight">Creative Fly (/fly)</span>, <span class="cmd">/observable</span>, <span class="cmd">/ae2 grids</span></td>
+                <td>2500 Claimed</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 40px; border-top: 1px solid #2d313d; padding-top: 20px; font-size: 0.85em; color: #9ca3af;">
+        <p><strong>Note:</strong> Force Loaded chunks keep your machinery and farms running even when you are not in the area or offline (from Engineer rank onwards).</p>
+        <p><strong>Commands:</strong> Most unlocked commands have their own internal cooldowns to maintain server balance.</p>
+    </div>
+</div>
+
+</body>
+</html>
