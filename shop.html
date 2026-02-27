@@ -1,0 +1,7126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CelestialMC - Item Shop</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        :root {
+            --primary-cyan: #00f0ff;
+            --primary-purple: #a855f7;
+            --accent-pink: #ff00aa;
+            --accent-green: #00ff88;
+            --bg-dark: #0a0a1a;
+            --bg-card: #13132b;
+            --text-light: #e0e7ff;
+            --text-glow: #fff;
+            --buy-color: #ff3366;
+            --sell-color: #00ff88;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a0a1a 100%);
+            background-attachment: fixed;
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(19, 19, 43, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 
+                0 0 50px rgba(0, 240, 255, 0.2),
+                0 0 100px rgba(168, 85, 247, 0.1),
+                inset 0 0 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+            animation: containerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            0% { box-shadow: 0 0 50px rgba(0, 240, 255, 0.2), 0 0 100px rgba(168, 85, 247, 0.1), inset 0 0 50px rgba(0, 0, 0, 0.5); }
+            100% { box-shadow: 0 0 60px rgba(0, 240, 255, 0.3), 0 0 120px rgba(168, 85, 247, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.5); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.02); filter: brightness(1.2); }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--primary-cyan);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            background: rgba(19, 19, 43, 0.9);
+            color: var(--text-light);
+            font-size: 18px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.6), inset 0 0 20px rgba(0, 240, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .search-box::placeholder {
+            color: rgba(224, 231, 255, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+            font-size: 16px;
+        }
+
+        th {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(168, 85, 247, 0.15));
+            color: var(--primary-cyan);
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        th:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(168, 85, 247, 0.25));
+            text-shadow: 0 0 10px var(--primary-cyan);
+        }
+
+        th:hover::after {
+            opacity: 1;
+        }
+
+        tbody tr {
+            background: rgba(19, 19, 43, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 240, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: -5px 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .category-tag {
+            font-size: 0.85em;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.6), rgba(0, 240, 255, 0.6));
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+            display: inline-block;
+        }
+
+        .price-buy {
+            color: var(--buy-color);
+            font-weight: 700;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.8);
+        }
+
+        .price-sell {
+            color: var(--sell-color);
+            font-weight: 700;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .zero {
+            color: rgba(224, 231, 255, 0.3);
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(19, 19, 43, 0.9), rgba(26, 10, 46, 0.9));
+            border-radius: 15px;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.2);
+        }
+
+        .pagination {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .pagination button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-purple));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pagination button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .pagination button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 30px rgba(0, 240, 255, 0.8);
+        }
+
+        .pagination button:disabled {
+            background: linear-gradient(135deg, rgba(100, 100, 100, 0.5), rgba(50, 50, 50, 0.5));
+            color: rgba(224, 231, 255, 0.3);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .page-info {
+            color: var(--primary-cyan);
+            font-size: 16px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .results-count {
+            color: var(--accent-green);
+            font-weight: 700;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        td:first-child {
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .container { padding: 20px; }
+            th, td { padding: 10px; font-size: 14px; }
+            .controls { flex-direction: column; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚡ CelestialMC Server Shop ⚡</h1>
+    <div class="subtitle">Premium Item Trading Station</div>
+    
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items or category...">
+    
+    <div class="controls">
+        <div class="results-count" id="resultsCount">Loading...</div>
+        <div class="pagination">
+            <button id="prevBtn" onclick="previousPage()">◄ Previous</button>
+            <span class="page-info" id="pageInfo">Page 1</span>
+            <button id="nextBtn" onclick="nextPage()">Next ►</button>
+        </div>
+    </div>
+
+    <table id="priceTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Item</th>
+                <th onclick="sortTable(1)">Category</th>
+                <th onclick="sortTable(2)">Stack</th>
+                <th onclick="sortTable(3)">Buy Price</th>
+                <th onclick="sortTable(4)">Sell Price</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const items = {
+  "ae2:fluix_covered_cable": {
+    "category": "ae2.cables",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "ae2:fluix_covered_dense_cable": {
+    "category": "ae2.cables",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "ae2:fluix_glass_cable": {
+    "category": "ae2.cables",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "ae2:fluix_smart_cable": {
+    "category": "ae2.cables",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "ae2:fluix_smart_dense_cable": {
+    "category": "ae2.cables",
+    "stack": 64,
+    "unit_buy": 180,
+    "unit_sell": 54
+  },
+  "ae2:quartz_fiber": {
+    "category": "ae2.cables",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "ae2:charger": {
+    "category": "ae2.machines",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "ae2:growth_accelerator": {
+    "category": "ae2.machines",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "ae2:inscriber": {
+    "category": "ae2.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "ae2:certus_quartz_crystal": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 8
+  },
+  "ae2:certus_quartz_dust": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6
+  },
+  "ae2:charged_certus_quartz_crystal": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "ae2:fluix_crystal": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "ae2:fluix_dust": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 20
+  },
+  "ae2:silicon": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "ae2:sky_dust": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 20
+  },
+  "ae2:sky_stone_block": {
+    "category": "ae2.materials",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 10
+  },
+  "ae2:annihilation_plane": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "ae2:controller": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 2500,
+    "unit_sell": 750
+  },
+  "ae2:crafting_terminal": {
+    "category": "ae2.network",
+    "stack": 1,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "ae2:drive": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "ae2:export_bus": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "ae2:formation_plane": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "ae2:import_bus": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "ae2:interface": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "ae2:level_emitter": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "ae2:me_chest": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "ae2:molecular_assembler": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "ae2:pattern_access_terminal": {
+    "category": "ae2.network",
+    "stack": 1,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "ae2:pattern_provider": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "ae2:quantum_link": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "ae2:quantum_ring": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "ae2:spatial_io_port": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "ae2:storage_bus": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "ae2:terminal": {
+    "category": "ae2.network",
+    "stack": 1,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "ae2:wireless_access_point": {
+    "category": "ae2.network",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "ae2:wireless_crafting_terminal": {
+    "category": "ae2.network",
+    "stack": 1,
+    "unit_buy": 2500,
+    "unit_sell": 750
+  },
+  "ae2:wireless_terminal": {
+    "category": "ae2.network",
+    "stack": 1,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "ae2:calculation_processor_press": {
+    "category": "ae2.presses",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "ae2:engineering_processor_press": {
+    "category": "ae2.presses",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "ae2:logic_processor_press": {
+    "category": "ae2.presses",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "ae2:silicon_press": {
+    "category": "ae2.presses",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "ae2:calculation_processor": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "ae2:engineering_processor": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 350,
+    "unit_sell": 105
+  },
+  "ae2:logic_processor": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "ae2:printed_calculation_processor": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "ae2:printed_engineering_processor": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 180,
+    "unit_sell": 54
+  },
+  "ae2:printed_logic_processor": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "ae2:printed_silicon": {
+    "category": "ae2.processors",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "ae2:cell_component_16k": {
+    "category": "ae2.storage",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "ae2:cell_component_1k": {
+    "category": "ae2.storage",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "ae2:cell_component_256k": {
+    "category": "ae2.storage",
+    "stack": 64,
+    "unit_buy": 50000,
+    "unit_sell": 15000
+  },
+  "ae2:cell_component_4k": {
+    "category": "ae2.storage",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "ae2:cell_component_64k": {
+    "category": "ae2.storage",
+    "stack": 64,
+    "unit_buy": 15000,
+    "unit_sell": 4500
+  },
+  "ae2:fluid_storage_cell_16k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 5500,
+    "unit_sell": 1650
+  },
+  "ae2:fluid_storage_cell_1k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 700,
+    "unit_sell": 210
+  },
+  "ae2:fluid_storage_cell_256k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 52000,
+    "unit_sell": 15600
+  },
+  "ae2:fluid_storage_cell_4k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 1800,
+    "unit_sell": 540
+  },
+  "ae2:fluid_storage_cell_64k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 16000,
+    "unit_sell": 4800
+  },
+  "ae2:item_storage_cell_16k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 5500,
+    "unit_sell": 1650
+  },
+  "ae2:item_storage_cell_1k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 700,
+    "unit_sell": 210
+  },
+  "ae2:item_storage_cell_256k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 52000,
+    "unit_sell": 15600
+  },
+  "ae2:item_storage_cell_4k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 1800,
+    "unit_sell": 540
+  },
+  "ae2:item_storage_cell_64k": {
+    "category": "ae2.storage",
+    "stack": 1,
+    "unit_buy": 16000,
+    "unit_sell": 4800
+  },
+  "alltheores:bronze_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 405,
+    "unit_sell": 126
+  },
+  "alltheores:constantan_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 495,
+    "unit_sell": 144
+  },
+  "alltheores:electrum_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 630,
+    "unit_sell": 189
+  },
+  "alltheores:enderium_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3600
+  },
+  "alltheores:invar_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 540,
+    "unit_sell": 162
+  },
+  "alltheores:iridium_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 2700,
+    "unit_sell": 810
+  },
+  "alltheores:lumium_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3150
+  },
+  "alltheores:nickel_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 360,
+    "unit_sell": 108
+  },
+  "alltheores:platinum_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 1800,
+    "unit_sell": 540
+  },
+  "alltheores:signalum_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 2700
+  },
+  "alltheores:silver_block": {
+    "category": "alltheores.blocks",
+    "stack": 64,
+    "unit_buy": 450,
+    "unit_sell": 135
+  },
+  "alltheores:bronze_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 12
+  },
+  "alltheores:constantan_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 14
+  },
+  "alltheores:electrum_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 19
+  },
+  "alltheores:enderium_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 398
+  },
+  "alltheores:invar_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 16
+  },
+  "alltheores:iridium_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 88
+  },
+  "alltheores:lumium_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 348
+  },
+  "alltheores:nickel_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10
+  },
+  "alltheores:platinum_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 58
+  },
+  "alltheores:signalum_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 298
+  },
+  "alltheores:silver_dust": {
+    "category": "alltheores.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 13
+  },
+  "alltheores:bronze_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "alltheores:bronze_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "alltheores:constantan_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 55,
+    "unit_sell": 16
+  },
+  "alltheores:constantan_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 1
+  },
+  "alltheores:electrum_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 70,
+    "unit_sell": 21
+  },
+  "alltheores:electrum_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 7,
+    "unit_sell": 2
+  },
+  "alltheores:enderium_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 400
+  },
+  "alltheores:enderium_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 44
+  },
+  "alltheores:invar_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "alltheores:invar_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "alltheores:iridium_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "alltheores:iridium_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 33,
+    "unit_sell": 10
+  },
+  "alltheores:lumium_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 350
+  },
+  "alltheores:lumium_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 38
+  },
+  "alltheores:nickel_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "alltheores:nickel_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "alltheores:platinum_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "alltheores:platinum_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 22,
+    "unit_sell": 6
+  },
+  "alltheores:signalum_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 300
+  },
+  "alltheores:signalum_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 33
+  },
+  "alltheores:silver_ingot": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "alltheores:silver_nugget": {
+    "category": "alltheores.ingots",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "alltheores:bronze_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 7
+  },
+  "alltheores:constantan_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8
+  },
+  "alltheores:deepslate_bronze_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8
+  },
+  "alltheores:deepslate_constantan_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "alltheores:deepslate_electrum_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 12
+  },
+  "alltheores:deepslate_invar_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10
+  },
+  "alltheores:deepslate_iridium_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 54
+  },
+  "alltheores:deepslate_nickel_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 7
+  },
+  "alltheores:deepslate_platinum_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 36
+  },
+  "alltheores:deepslate_silver_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "alltheores:electrum_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10
+  },
+  "alltheores:invar_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "alltheores:iridium_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 45
+  },
+  "alltheores:nickel_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6
+  },
+  "alltheores:platinum_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 30
+  },
+  "alltheores:raw_bronze": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "alltheores:raw_constantan": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 55,
+    "unit_sell": 16
+  },
+  "alltheores:raw_electrum": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 70,
+    "unit_sell": 21
+  },
+  "alltheores:raw_invar": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "alltheores:raw_iridium": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "alltheores:raw_nickel": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "alltheores:raw_platinum": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "alltheores:raw_silver": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "alltheores:silver_ore": {
+    "category": "alltheores.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 7
+  },
+  "apotheosis:gem_dust": {
+    "category": "apotheosis.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "apotheosis:lucky_foot": {
+    "category": "apotheosis.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50
+  },
+  "apotheosis:hellshelf": {
+    "category": "apotheosis.shelves",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "apotheosis:infused_hellshelf": {
+    "category": "apotheosis.shelves",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "apotheosis:infused_seashelf": {
+    "category": "apotheosis.shelves",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "minecraft:angler_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:archer_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:arms_up_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:blade_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:brewer_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:brush": {
+    "category": "archaeology",
+    "stack": 1,
+    "unit_buy": 9,
+    "unit_sell": 3
+  },
+  "minecraft:burn_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:danger_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:decorated_pot": {
+    "category": "archaeology",
+    "stack": 1,
+    "unit_buy": 15,
+    "unit_sell": 5
+  },
+  "minecraft:explorer_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:flow_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:friend_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:guster_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:heart_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:heartbreak_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:howl_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:miner_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:mourner_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:plenty_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:prize_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:scrape_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:sheaf_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 81,
+    "unit_sell": 27
+  },
+  "minecraft:shelter_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:skull_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "minecraft:sniffer_egg": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 360,
+    "unit_sell": 120
+  },
+  "minecraft:snort_pottery_sherd": {
+    "category": "archaeology",
+    "stack": 64,
+    "unit_buy": 63,
+    "unit_sell": 21
+  },
+  "minecraft:armor_stand": {
+    "category": "armor",
+    "stack": 16,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:bolt_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 600
+  },
+  "minecraft:chainmail_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 65,
+    "unit_sell": 20
+  },
+  "minecraft:chainmail_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "minecraft:chainmail_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 70,
+    "unit_sell": 21
+  },
+  "minecraft:chainmail_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 105,
+    "unit_sell": 32
+  },
+  "minecraft:coast_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 255
+  },
+  "minecraft:copper_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 12,
+    "unit_sell": 4
+  },
+  "minecraft:copper_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 24,
+    "unit_sell": 7
+  },
+  "minecraft:copper_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 15,
+    "unit_sell": 5
+  },
+  "minecraft:copper_horse_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 90,
+    "unit_sell": 27
+  },
+  "minecraft:copper_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 21,
+    "unit_sell": 6
+  },
+  "minecraft:diamond_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 1120,
+    "unit_sell": 336
+  },
+  "minecraft:diamond_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 2240,
+    "unit_sell": 672
+  },
+  "minecraft:diamond_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 1400,
+    "unit_sell": 420
+  },
+  "minecraft:diamond_horse_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "minecraft:diamond_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 1960,
+    "unit_sell": 588
+  },
+  "minecraft:dune_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 255
+  },
+  "minecraft:eye_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 510
+  },
+  "minecraft:flow_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 600
+  },
+  "minecraft:golden_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 240,
+    "unit_sell": 72
+  },
+  "minecraft:golden_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 480,
+    "unit_sell": 144
+  },
+  "minecraft:golden_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "minecraft:golden_horse_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "minecraft:golden_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 420,
+    "unit_sell": 126
+  },
+  "minecraft:host_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 510
+  },
+  "minecraft:iron_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "minecraft:iron_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "minecraft:iron_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 75,
+    "unit_sell": 23
+  },
+  "minecraft:iron_horse_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 180,
+    "unit_sell": 54
+  },
+  "minecraft:iron_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 105,
+    "unit_sell": 32
+  },
+  "minecraft:leather_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 32,
+    "unit_sell": 10
+  },
+  "minecraft:leather_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 64,
+    "unit_sell": 19
+  },
+  "minecraft:leather_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "minecraft:leather_horse_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 56,
+    "unit_sell": 17
+  },
+  "minecraft:leather_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 56,
+    "unit_sell": 17
+  },
+  "minecraft:netherite_boots": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 3340,
+    "unit_sell": 1002
+  },
+  "minecraft:netherite_chestplate": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 4340,
+    "unit_sell": 1302
+  },
+  "minecraft:netherite_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 3640,
+    "unit_sell": 1092
+  },
+  "minecraft:netherite_horse_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 3340,
+    "unit_sell": 1002
+  },
+  "minecraft:netherite_leggings": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 4140,
+    "unit_sell": 1242
+  },
+  "minecraft:raiser_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 330
+  },
+  "minecraft:rib_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 390
+  },
+  "minecraft:sentry_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 390
+  },
+  "minecraft:shaper_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 330
+  },
+  "minecraft:shield": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 27,
+    "unit_sell": 8
+  },
+  "minecraft:silence_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 660
+  },
+  "minecraft:snout_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 390
+  },
+  "minecraft:spire_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 510
+  },
+  "minecraft:tide_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 660
+  },
+  "minecraft:turtle_helmet": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "minecraft:vex_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 510
+  },
+  "minecraft:ward_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 660
+  },
+  "minecraft:wayfinder_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 330
+  },
+  "minecraft:wild_armor_trim_smithing_template": {
+    "category": "armor",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 390
+  },
+  "minecraft:wolf_armor": {
+    "category": "armor",
+    "stack": 1,
+    "unit_buy": 180,
+    "unit_sell": 54
+  },
+  "ars_nouveau:wilden_horn": {
+    "category": "ars.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 150
+  },
+  "ars_nouveau:wilden_spike": {
+    "category": "ars.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 150
+  },
+  "ars_nouveau:wilden_tribute": {
+    "category": "ars.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "ars_nouveau:wilden_wing": {
+    "category": "ars.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 150
+  },
+  "ars_nouveau:alteration_table": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "ars_nouveau:arcane_pedestal": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "ars_nouveau:enchanting_apparatus": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "ars_nouveau:imbuement_chamber": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "ars_nouveau:relay": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "ars_nouveau:scribes_table": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "ars_nouveau:source_jar": {
+    "category": "ars.machines",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "ars_nouveau:archwood_log": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "ars_nouveau:blaze_fiber": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "ars_nouveau:end_fiber": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "ars_nouveau:mana_fiber": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "ars_nouveau:source_berry": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "ars_nouveau:source_gem": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 8
+  },
+  "ars_nouveau:source_gem_block": {
+    "category": "ars.materials",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 70
+  },
+  "ars_nouveau:apprentice_spell_book": {
+    "category": "ars.tools",
+    "stack": 1,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "ars_nouveau:archmage_spell_book": {
+    "category": "ars.tools",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "ars_nouveau:novice_spell_book": {
+    "category": "ars.tools",
+    "stack": 1,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "allthemodium:allthemodium_boots": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 20000,
+    "unit_sell": 6500
+  },
+  "allthemodium:allthemodium_chestplate": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 40000,
+    "unit_sell": 13000
+  },
+  "allthemodium:allthemodium_helmet": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 25000,
+    "unit_sell": 8000
+  },
+  "allthemodium:allthemodium_leggings": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 35000,
+    "unit_sell": 11500
+  },
+  "allthemodium:unobtainium_boots": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 100000,
+    "unit_sell": 33000
+  },
+  "allthemodium:unobtainium_chestplate": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 190000,
+    "unit_sell": 63000
+  },
+  "allthemodium:unobtainium_helmet": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 120000,
+    "unit_sell": 40000
+  },
+  "allthemodium:unobtainium_leggings": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 170000,
+    "unit_sell": 56000
+  },
+  "allthemodium:vibranium_boots": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 40000,
+    "unit_sell": 13000
+  },
+  "allthemodium:vibranium_chestplate": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 80000,
+    "unit_sell": 26000
+  },
+  "allthemodium:vibranium_helmet": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 50000,
+    "unit_sell": 16000
+  },
+  "allthemodium:vibranium_leggings": {
+    "category": "atm_armor",
+    "stack": 1,
+    "unit_buy": 70000,
+    "unit_sell": 23000
+  },
+  "allthemodium:allthemodium_block": {
+    "category": "atm_blocks",
+    "stack": 64,
+    "unit_buy": 162000,
+    "unit_sell": 54000
+  },
+  "allthemodium:unobtainium_block": {
+    "category": "atm_blocks",
+    "stack": 64,
+    "unit_buy": 810000,
+    "unit_sell": 270000
+  },
+  "allthemodium:vibranium_block": {
+    "category": "atm_blocks",
+    "stack": 64,
+    "unit_buy": 324000,
+    "unit_sell": 108000
+  },
+  "allthemodium:allthemodium_dust": {
+    "category": "atm_dusts",
+    "stack": 64,
+    "unit_buy": 16500,
+    "unit_sell": 5500
+  },
+  "allthemodium:unobtainium_dust": {
+    "category": "atm_dusts",
+    "stack": 64,
+    "unit_buy": 84000,
+    "unit_sell": 28000
+  },
+  "allthemodium:vibranium_dust": {
+    "category": "atm_dusts",
+    "stack": 64,
+    "unit_buy": 33000,
+    "unit_sell": 11000
+  },
+  "allthemodium:atm_star": {
+    "category": "atm_endgame",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 500000
+  },
+  "allthemodium:atm_star_block": {
+    "category": "atm_endgame",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 4500000
+  },
+  "allthemodium:allthemodium_ingot": {
+    "category": "atm_ingots",
+    "stack": 64,
+    "unit_buy": 18000,
+    "unit_sell": 6000
+  },
+  "allthemodium:allthemodium_nugget": {
+    "category": "atm_ingots",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 670
+  },
+  "allthemodium:unobtainium_ingot": {
+    "category": "atm_ingots",
+    "stack": 64,
+    "unit_buy": 90000,
+    "unit_sell": 30000
+  },
+  "allthemodium:unobtainium_nugget": {
+    "category": "atm_ingots",
+    "stack": 64,
+    "unit_buy": 10020,
+    "unit_sell": 3340
+  },
+  "allthemodium:vibranium_ingot": {
+    "category": "atm_ingots",
+    "stack": 64,
+    "unit_buy": 36000,
+    "unit_sell": 12000
+  },
+  "allthemodium:vibranium_nugget": {
+    "category": "atm_ingots",
+    "stack": 64,
+    "unit_buy": 4020,
+    "unit_sell": 1340
+  },
+  "allthemodium:allthemodium_ore": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 5000
+  },
+  "allthemodium:allthemodium_slate_ore": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 5000
+  },
+  "allthemodium:raw_allthemodium": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3000
+  },
+  "allthemodium:raw_unobtainium": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 18000
+  },
+  "allthemodium:raw_vibranium": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 7000
+  },
+  "allthemodium:unobtainium_ore": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 25000
+  },
+  "allthemodium:vibranium_nether_ore": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10000
+  },
+  "allthemodium:vibranium_ore": {
+    "category": "atm_ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10000
+  },
+  "allthemodium:allthemodium_axe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 20000,
+    "unit_sell": 6500
+  },
+  "allthemodium:allthemodium_hoe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 14000,
+    "unit_sell": 4500
+  },
+  "allthemodium:allthemodium_pickaxe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 20000,
+    "unit_sell": 6500
+  },
+  "allthemodium:allthemodium_shovel": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 14000,
+    "unit_sell": 4500
+  },
+  "allthemodium:unobtainium_axe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 100000,
+    "unit_sell": 33000
+  },
+  "allthemodium:unobtainium_hoe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 70000,
+    "unit_sell": 23000
+  },
+  "allthemodium:unobtainium_pickaxe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 100000,
+    "unit_sell": 33000
+  },
+  "allthemodium:unobtainium_shovel": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 70000,
+    "unit_sell": 23000
+  },
+  "allthemodium:vibranium_axe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 40000,
+    "unit_sell": 13000
+  },
+  "allthemodium:vibranium_hoe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 28000,
+    "unit_sell": 9000
+  },
+  "allthemodium:vibranium_pickaxe": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 40000,
+    "unit_sell": 13000
+  },
+  "allthemodium:vibranium_shovel": {
+    "category": "atm_tools",
+    "stack": 1,
+    "unit_buy": 28000,
+    "unit_sell": 9000
+  },
+  "allthemodium:allthemodium_sword": {
+    "category": "atm_weapons",
+    "stack": 1,
+    "unit_buy": 16000,
+    "unit_sell": 5200
+  },
+  "allthemodium:unobtainium_sword": {
+    "category": "atm_weapons",
+    "stack": 1,
+    "unit_buy": 80000,
+    "unit_sell": 26000
+  },
+  "allthemodium:vibranium_sword": {
+    "category": "atm_weapons",
+    "stack": 1,
+    "unit_buy": 32000,
+    "unit_sell": 10500
+  },
+  "minecraft:dragon_breath": {
+    "category": "blocks.end",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 12
+  },
+  "minecraft:dragon_egg": {
+    "category": "blocks.end",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6000
+  },
+  "cataclysm:amethyst_crab_claw": {
+    "category": "cataclysm.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 4000
+  },
+  "cataclysm:desert_eye": {
+    "category": "cataclysm.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8000
+  },
+  "cataclysm:flame_eye": {
+    "category": "cataclysm.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8000
+  },
+  "cataclysm:monstrous_horn": {
+    "category": "cataclysm.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6000
+  },
+  "cataclysm:void_core": {
+    "category": "cataclysm.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10000
+  },
+  "cataclysm:enderite_ingot": {
+    "category": "cataclysm.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3000
+  },
+  "cataclysm:ignitium_ingot": {
+    "category": "cataclysm.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 5000
+  },
+  "cataclysm:witherite_ingot": {
+    "category": "cataclysm.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "cataclysm:bulwark_of_the_flame": {
+    "category": "cataclysm.weapons",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 22000
+  },
+  "cataclysm:gauntlet_of_bulwark": {
+    "category": "cataclysm.weapons",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 15000
+  },
+  "cataclysm:the_incinerator": {
+    "category": "cataclysm.weapons",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 18000
+  },
+  "cataclysm:void_forge": {
+    "category": "cataclysm.weapons",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 20000
+  },
+  "create:andesite_alloy": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 25,
+    "unit_sell": 7
+  },
+  "create:brass_sheet": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "create:copper_sheet": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "create:electron_tube": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "create:experience_nugget": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50
+  },
+  "create:golden_sheet": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "create:iron_sheet": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "create:precision_mechanism": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "create:propeller": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "create:railway_casing": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "create:sturdy_sheet": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:whisk": {
+    "category": "create.components",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "create:clutch": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "create:cogwheel": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 12,
+    "unit_sell": 3
+  },
+  "create:creative_motor": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 200000
+  },
+  "create:gearbox": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "create:gearshift": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "create:hand_crank": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "create:large_cogwheel": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 4
+  },
+  "create:large_water_wheel": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "create:shaft": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "create:water_wheel": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "create:windmill_bearing": {
+    "category": "create.kinetics",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:basin": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "create:blaze_burner": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:chute": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "create:crushing_wheel": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "create:deployer": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "create:depot": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "create:display_board": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:display_link": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "create:encased_fan": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:fluid_tank": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "create:gantry_carriage": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "create:hose_pulley": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 350,
+    "unit_sell": 105
+  },
+  "create:item_vault": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "create:mechanical_bearing": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "create:mechanical_drill": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "create:mechanical_harvester": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "create:mechanical_mixer": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "create:mechanical_piston": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:mechanical_plough": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:mechanical_press": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "create:mechanical_saw": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "create:millstone": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "create:portable_fluid_interface": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "create:portable_storage_interface": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "create:rope_pulley": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:smart_chute": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:steam_engine": {
+    "category": "create.machines",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "create:brass_block": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 540,
+    "unit_sell": 162
+  },
+  "create:brass_ingot": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "create:brass_nugget": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "create:deepslate_zinc_ore": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 14
+  },
+  "create:raw_zinc": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "create:zinc_block": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 315,
+    "unit_sell": 90
+  },
+  "create:zinc_ingot": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "create:zinc_nugget": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "create:zinc_ore": {
+    "category": "create.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 12
+  },
+  "create:controls": {
+    "category": "create.trains",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "create:track": {
+    "category": "create.trains",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "create:track_observer": {
+    "category": "create.trains",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:train_door": {
+    "category": "create.trains",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "create:train_signal": {
+    "category": "create.trains",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "create:train_station": {
+    "category": "create.trains",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "deeperdarker:gloomslate": {
+    "category": "deeperdarker.blocks",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "deeperdarker:sculk_stone": {
+    "category": "deeperdarker.blocks",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "deeperdarker:reinforced_echo_shard": {
+    "category": "deeperdarker.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 100
+  },
+  "deeperdarker:soul_crystal": {
+    "category": "deeperdarker.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 300
+  },
+  "deeperdarker:warden_carapace": {
+    "category": "deeperdarker.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 500
+  },
+  "draconicevolution:awakened_core": {
+    "category": "draconic.components",
+    "stack": 64,
+    "unit_buy": 20000,
+    "unit_sell": 6000
+  },
+  "draconicevolution:chaotic_core": {
+    "category": "draconic.components",
+    "stack": 64,
+    "unit_buy": 80000,
+    "unit_sell": 24000
+  },
+  "draconicevolution:wyvern_core": {
+    "category": "draconic.components",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "draconicevolution:basic_energy_core": {
+    "category": "draconic.energy",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "draconicevolution:chaotic_energy_core": {
+    "category": "draconic.energy",
+    "stack": 64,
+    "unit_buy": 250000,
+    "unit_sell": 75000
+  },
+  "draconicevolution:draconic_energy_core": {
+    "category": "draconic.energy",
+    "stack": 64,
+    "unit_buy": 60000,
+    "unit_sell": 18000
+  },
+  "draconicevolution:wyvern_energy_core": {
+    "category": "draconic.energy",
+    "stack": 64,
+    "unit_buy": 15000,
+    "unit_sell": 4500
+  },
+  "draconicevolution:chaotic_bow": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 250000
+  },
+  "draconicevolution:chaotic_chestplate": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 350000
+  },
+  "draconicevolution:chaotic_pickaxe": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 250000
+  },
+  "draconicevolution:chaotic_sword": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 250000
+  },
+  "draconicevolution:draconic_bow": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 60000
+  },
+  "draconicevolution:draconic_chestplate": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 80000
+  },
+  "draconicevolution:draconic_pickaxe": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 60000
+  },
+  "draconicevolution:draconic_sword": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 60000
+  },
+  "draconicevolution:wyvern_bow": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 15000
+  },
+  "draconicevolution:wyvern_chestplate": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 20000
+  },
+  "draconicevolution:wyvern_pickaxe": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 15000
+  },
+  "draconicevolution:wyvern_sword": {
+    "category": "draconic.gear",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 15000
+  },
+  "draconicevolution:awakened_draconium_block": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 216000,
+    "unit_sell": 72000
+  },
+  "draconicevolution:awakened_draconium_ingot": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 24000,
+    "unit_sell": 8000
+  },
+  "draconicevolution:draconium_block": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 21600,
+    "unit_sell": 7200
+  },
+  "draconicevolution:draconium_dust": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 750
+  },
+  "draconicevolution:draconium_ingot": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 2400,
+    "unit_sell": 800
+  },
+  "draconicevolution:draconium_ore": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 900
+  },
+  "draconicevolution:dragon_heart": {
+    "category": "draconic.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50000
+  },
+  "minecraft:armadillo_scute": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "minecraft:blaze_powder": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 5
+  },
+  "minecraft:blaze_rod": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "minecraft:bone": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:breeze_rod": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 70,
+    "unit_sell": 21
+  },
+  "minecraft:creeper_head": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 450
+  },
+  "minecraft:dragon_head": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1500
+  },
+  "minecraft:ender_pearl": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "minecraft:feather": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:ghast_tear": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "minecraft:glow_ink_sac": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "minecraft:gunpowder": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "minecraft:honeycomb": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1
+  },
+  "minecraft:ink_sac": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:leather": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:magma_cream": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 25,
+    "unit_sell": 8
+  },
+  "minecraft:nautilus_shell": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "minecraft:nether_star": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "minecraft:ominous_trial_key": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 90
+  },
+  "minecraft:phantom_membrane": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "minecraft:piglin_head": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 450
+  },
+  "minecraft:rabbit_hide": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:rotten_flesh": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:skeleton_skull": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 450
+  },
+  "minecraft:slime_ball": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "minecraft:spider_eye": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:string": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:trial_key": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 30
+  },
+  "minecraft:turtle_scute": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "minecraft:wither_rose": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "minecraft:wither_skeleton_skull": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 180
+  },
+  "minecraft:zombie_head": {
+    "category": "drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 450
+  },
+  "evilcraft:blood_infusion_core": {
+    "category": "evilcraft.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "evilcraft:dark_gem": {
+    "category": "evilcraft.materials",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "evilcraft:dark_gem_crushed": {
+    "category": "evilcraft.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 20
+  },
+  "evilcraft:dark_power_gem": {
+    "category": "evilcraft.materials",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "evilcraft:vengeance_essence": {
+    "category": "evilcraft.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 40
+  },
+  "farmersdelight:cabbage": {
+    "category": "farmersdelight.crops",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "farmersdelight:onion": {
+    "category": "farmersdelight.crops",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "farmersdelight:rice": {
+    "category": "farmersdelight.crops",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "farmersdelight:tomato": {
+    "category": "farmersdelight.crops",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "farmersdelight:apple_pie": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "farmersdelight:bacon_and_eggs": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "farmersdelight:baked_cod_stew": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "farmersdelight:barbecue_stick": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "farmersdelight:bone_broth": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "farmersdelight:cake_slice": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 4
+  },
+  "farmersdelight:chicken_sandwich": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "farmersdelight:chocolate_pie": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "farmersdelight:dumplings": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "farmersdelight:egg_sandwich": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 25,
+    "unit_sell": 7
+  },
+  "farmersdelight:fish_stew": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "farmersdelight:fried_rice": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "farmersdelight:fruit_salad": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "farmersdelight:grilled_salmon": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "farmersdelight:hamburger": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "farmersdelight:honey_cookie": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "farmersdelight:honey_glazed_ham": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 85,
+    "unit_sell": 25
+  },
+  "farmersdelight:melon_popsicle": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "farmersdelight:mixed_salad": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "farmersdelight:noodle_soup": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "farmersdelight:pasta_with_meatballs": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 70,
+    "unit_sell": 21
+  },
+  "farmersdelight:pumpkin_soup": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "farmersdelight:ratatouille": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 55,
+    "unit_sell": 16
+  },
+  "farmersdelight:roast_chicken": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 65,
+    "unit_sell": 20
+  },
+  "farmersdelight:roasted_mutton_chops": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 55,
+    "unit_sell": 16
+  },
+  "farmersdelight:shepherds_pie": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 75,
+    "unit_sell": 22
+  },
+  "farmersdelight:steak_and_potatoes": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "farmersdelight:stuffed_pumpkin": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 90,
+    "unit_sell": 27
+  },
+  "farmersdelight:sweet_berry_cheesecake": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "farmersdelight:sweet_berry_cookie": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "farmersdelight:vegetable_noodles": {
+    "category": "farmersdelight.foods",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "farmersdelight:cooking_pot": {
+    "category": "farmersdelight.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "farmersdelight:cutting_board": {
+    "category": "farmersdelight.machines",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "farmersdelight:skillet": {
+    "category": "farmersdelight.machines",
+    "stack": 1,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "farmersdelight:stove": {
+    "category": "farmersdelight.machines",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "farmersdelight:canvas": {
+    "category": "farmersdelight.materials",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "farmersdelight:organic_compost": {
+    "category": "farmersdelight.materials",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 4
+  },
+  "farmersdelight:rich_soil": {
+    "category": "farmersdelight.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "farmersdelight:rope": {
+    "category": "farmersdelight.materials",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "farmersdelight:diamond_knife": {
+    "category": "farmersdelight.tools",
+    "stack": 1,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "farmersdelight:flint_knife": {
+    "category": "farmersdelight.tools",
+    "stack": 1,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "farmersdelight:golden_knife": {
+    "category": "farmersdelight.tools",
+    "stack": 1,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "farmersdelight:iron_knife": {
+    "category": "farmersdelight.tools",
+    "stack": 1,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "farmersdelight:netherite_knife": {
+    "category": "farmersdelight.tools",
+    "stack": 1,
+    "unit_buy": 2600,
+    "unit_sell": 780
+  },
+  "fluxnetworks:flux_block": {
+    "category": "flux.blocks",
+    "stack": 64,
+    "unit_buy": 450,
+    "unit_sell": 135
+  },
+  "fluxnetworks:flux_controller": {
+    "category": "flux.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "fluxnetworks:flux_plug": {
+    "category": "flux.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "fluxnetworks:flux_point": {
+    "category": "flux.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "fluxnetworks:flux_core": {
+    "category": "flux.materials",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "fluxnetworks:flux_dust": {
+    "category": "flux.materials",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "fluxnetworks:flux_storage_1": {
+    "category": "flux.storage",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "fluxnetworks:flux_storage_2": {
+    "category": "flux.storage",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "fluxnetworks:flux_storage_3": {
+    "category": "flux.storage",
+    "stack": 64,
+    "unit_buy": 15000,
+    "unit_sell": 4500
+  },
+  "minecraft:apple": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "minecraft:baked_potato": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:beef": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 7,
+    "unit_sell": 2
+  },
+  "minecraft:beetroot": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:bread": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "minecraft:carrot": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:chicken": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:chorus_fruit": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:cod": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:cooked_beef": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:cooked_chicken": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "minecraft:cooked_cod": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "minecraft:cooked_mutton": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "minecraft:cooked_porkchop": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:cooked_rabbit": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "minecraft:cooked_salmon": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:cookie": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:dried_kelp": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:egg": {
+    "category": "food",
+    "stack": 16,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:enchanted_golden_apple": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 150
+  },
+  "minecraft:glow_berries": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:golden_apple": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 490,
+    "unit_sell": 147
+  },
+  "minecraft:golden_carrot": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 56,
+    "unit_sell": 17
+  },
+  "minecraft:melon_slice": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:mutton": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:popped_chorus_fruit": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "minecraft:porkchop": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 7,
+    "unit_sell": 2
+  },
+  "minecraft:potato": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:pufferfish": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:pumpkin_pie": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 9,
+    "unit_sell": 3
+  },
+  "minecraft:rabbit": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:salmon": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "minecraft:sugar": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1
+  },
+  "minecraft:sweet_berries": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:tropical_fish": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:wheat": {
+    "category": "food",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "forbidden_arcanus:arcane_crystal_dust": {
+    "category": "forbidden.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 25
+  },
+  "forbidden_arcanus:deorum_ingot": {
+    "category": "forbidden.materials",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "forbidden_arcanus:eternal_stella": {
+    "category": "forbidden.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 5000
+  },
+  "forbidden_arcanus:mundabitur_dust": {
+    "category": "forbidden.materials",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "forbidden_arcanus:obsidian_ingot": {
+    "category": "forbidden.materials",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "functionalstorage:configuration_tool": {
+    "category": "functional_storage",
+    "stack": 1,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "functionalstorage:linking_tool": {
+    "category": "functional_storage",
+    "stack": 1,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "functionalstorage:oak_1": {
+    "category": "functional_storage",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "functionalstorage:oak_2": {
+    "category": "functional_storage",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "functionalstorage:oak_4": {
+    "category": "functional_storage",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "functionalstorage:storage_controller": {
+    "category": "functional_storage",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "buildinggadgets2:gadget_building": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "buildinggadgets2:gadget_copy_paste": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "buildinggadgets2:gadget_destruction": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "buildinggadgets2:gadget_exchanging": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "mininggadgets:mininggadget": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mininggadgets:mininggadget_fancy": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "mininggadgets:mininggadget_simple": {
+    "category": "gadgets.tools",
+    "stack": 1,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "immersiveengineering:component_iron": {
+    "category": "immersive.components",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "immersiveengineering:component_steel": {
+    "category": "immersive.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "immersiveengineering:connector_hv": {
+    "category": "immersive.connectors",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "immersiveengineering:connector_lv": {
+    "category": "immersive.connectors",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "immersiveengineering:connector_mv": {
+    "category": "immersive.connectors",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "immersiveengineering:relay_hv": {
+    "category": "immersive.connectors",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "immersiveengineering:relay_lv": {
+    "category": "immersive.connectors",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "immersiveengineering:relay_mv": {
+    "category": "immersive.connectors",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "immersiveengineering:dust_aluminum": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "immersiveengineering:dust_steel": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 32
+  },
+  "immersiveengineering:ingot_aluminum": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "immersiveengineering:ingot_steel": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 35
+  },
+  "immersiveengineering:plate_aluminum": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "immersiveengineering:plate_copper": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "immersiveengineering:plate_gold": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 70,
+    "unit_sell": 21
+  },
+  "immersiveengineering:plate_iron": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "immersiveengineering:plate_steel": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 140,
+    "unit_sell": 42
+  },
+  "immersiveengineering:treated_wood_horizontal": {
+    "category": "immersive.materials",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 4
+  },
+  "immersiveengineering:wire_aluminum": {
+    "category": "immersive.wires",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "immersiveengineering:wire_copper": {
+    "category": "immersive.wires",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "immersiveengineering:wire_electrum": {
+    "category": "immersive.wires",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "immersiveengineering:wire_steel": {
+    "category": "immersive.wires",
+    "stack": 64,
+    "unit_buy": 140,
+    "unit_sell": 42
+  },
+  "industrialforegoing:infinity_drill": {
+    "category": "industrial.endgame",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 80000
+  },
+  "industrialforegoing:machine_frame_advanced": {
+    "category": "industrial.frames",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "industrialforegoing:machine_frame_pity": {
+    "category": "industrial.frames",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "industrialforegoing:machine_frame_simple": {
+    "category": "industrial.frames",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "industrialforegoing:machine_frame_supreme": {
+    "category": "industrial.frames",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "industrialforegoing:animal_rancher": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "industrialforegoing:dissolution_chamber": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "industrialforegoing:laser_base": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "industrialforegoing:laser_drill": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "industrialforegoing:material_stonework_factory": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "industrialforegoing:mob_crusher": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "industrialforegoing:mob_duplicator": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "industrialforegoing:plant_gatherer": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "industrialforegoing:plant_sower": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "industrialforegoing:resourceful_furnace": {
+    "category": "industrial.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "industrialforegoing:dry_rubber": {
+    "category": "industrial.materials",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "industrialforegoing:ether_gas_bucket": {
+    "category": "industrial.materials",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 200
+  },
+  "industrialforegoing:latex": {
+    "category": "industrial.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "industrialforegoing:pink_slime": {
+    "category": "industrial.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 100
+  },
+  "industrialforegoing:pink_slime_ingot": {
+    "category": "industrial.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 500
+  },
+  "industrialforegoing:plastic": {
+    "category": "industrial.materials",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "irons_spellbooks:inscription_table": {
+    "category": "irons.machines",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "irons_spellbooks:scroll_forge": {
+    "category": "irons.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "irons_spellbooks:arcane_essence": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 40
+  },
+  "irons_spellbooks:arcane_ingot": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "irons_spellbooks:blood_vial": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50
+  },
+  "irons_spellbooks:cinder_essence": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 60
+  },
+  "irons_spellbooks:common_ink": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "irons_spellbooks:epic_ink": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "irons_spellbooks:frozen_bone": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 40
+  },
+  "irons_spellbooks:hogskin": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 30
+  },
+  "irons_spellbooks:legendary_ink": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "irons_spellbooks:rare_ink": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "irons_spellbooks:uncommon_ink": {
+    "category": "irons.materials",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "irons_spellbooks:copper_spell_book": {
+    "category": "irons.tools",
+    "stack": 1,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "irons_spellbooks:diamond_spell_book": {
+    "category": "irons.tools",
+    "stack": 1,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "irons_spellbooks:gold_spell_book": {
+    "category": "irons.tools",
+    "stack": 1,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "irons_spellbooks:iron_spell_book": {
+    "category": "irons.tools",
+    "stack": 1,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "irons_spellbooks:netherite_spell_book": {
+    "category": "irons.tools",
+    "stack": 1,
+    "unit_buy": 12000,
+    "unit_sell": 3600
+  },
+  "mahou_tsukai:mana_dust": {
+    "category": "mahou.materials",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "mekanism:osmium_boots": {
+    "category": "mekanism.armor",
+    "stack": 1,
+    "unit_buy": 160,
+    "unit_sell": 48
+  },
+  "mekanism:osmium_chestplate": {
+    "category": "mekanism.armor",
+    "stack": 1,
+    "unit_buy": 320,
+    "unit_sell": 96
+  },
+  "mekanism:osmium_helmet": {
+    "category": "mekanism.armor",
+    "stack": 1,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "mekanism:osmium_leggings": {
+    "category": "mekanism.armor",
+    "stack": 1,
+    "unit_buy": 280,
+    "unit_sell": 84
+  },
+  "mekanism:block_bronze": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 405,
+    "unit_sell": 126
+  },
+  "mekanism:block_lead": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 405,
+    "unit_sell": 122
+  },
+  "mekanism:block_osmium": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 450,
+    "unit_sell": 135
+  },
+  "mekanism:block_refined_glowstone": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 3600,
+    "unit_sell": 1080
+  },
+  "mekanism:block_refined_obsidian": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 4500,
+    "unit_sell": 1350
+  },
+  "mekanism:block_steel": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 1080,
+    "unit_sell": 315
+  },
+  "mekanism:block_tin": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 360,
+    "unit_sell": 108
+  },
+  "mekanism:block_uranium": {
+    "category": "mekanism.blocks",
+    "stack": 64,
+    "unit_buy": 720,
+    "unit_sell": 225
+  },
+  "mekanism:advanced_control_circuit": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "mekanism:basic_control_circuit": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "mekanism:elite_control_circuit": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "mekanism:energy_tablet": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "mekanism:enriched_iron": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 8
+  },
+  "mekanism:fissile_fuel": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 500
+  },
+  "mekanism:hdpe_pellet": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 180,
+    "unit_sell": 60
+  },
+  "mekanism:hdpe_rod": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 130
+  },
+  "mekanism:hdpe_sheet": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 200
+  },
+  "mekanism:hdpe_stick": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 65
+  },
+  "mekanism:pellet_antimatter": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50000
+  },
+  "mekanism:pellet_plutonium": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8000
+  },
+  "mekanism:pellet_polonium": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10000
+  },
+  "mekanism:teleportation_core": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:ultimate_control_circuit": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "mekanism:yellow_cake_uranium": {
+    "category": "mekanism.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "mekanism:dust_diamond": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mekanism:dust_fluorite": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 15
+  },
+  "mekanism:dust_lead": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 16
+  },
+  "mekanism:dust_lithium": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 30
+  },
+  "mekanism:dust_osmium": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 18
+  },
+  "mekanism:dust_refined_obsidian": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 140
+  },
+  "mekanism:dust_steel": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 40
+  },
+  "mekanism:dust_sulfur": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 5
+  },
+  "mekanism:dust_tin": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 14
+  },
+  "mekanism:dust_uranium": {
+    "category": "mekanism.dusts",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 28
+  },
+  "mekanism:meka_tool": {
+    "category": "mekanism.endgame",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 120000
+  },
+  "mekanism:mekasuit_bodyarmor": {
+    "category": "mekanism.endgame",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 150000
+  },
+  "mekanism:mekasuit_boots": {
+    "category": "mekanism.endgame",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 100000
+  },
+  "mekanism:mekasuit_helmet": {
+    "category": "mekanism.endgame",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 100000
+  },
+  "mekanism:mekasuit_pants": {
+    "category": "mekanism.endgame",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 130000
+  },
+  "mekanism:advanced_energy_cube": {
+    "category": "mekanism.energy",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:basic_energy_cube": {
+    "category": "mekanism.energy",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "mekanism:elite_energy_cube": {
+    "category": "mekanism.energy",
+    "stack": 64,
+    "unit_buy": 8000,
+    "unit_sell": 2400
+  },
+  "mekanism:ultimate_energy_cube": {
+    "category": "mekanism.energy",
+    "stack": 64,
+    "unit_buy": 25000,
+    "unit_sell": 7500
+  },
+  "mekanism:fluorite_gem": {
+    "category": "mekanism.gems",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "mekanism:advanced_solar_generator": {
+    "category": "mekanism.generators",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "mekanism:bio_generator": {
+    "category": "mekanism.generators",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "mekanism:gas_burning_generator": {
+    "category": "mekanism.generators",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "mekanism:heat_generator": {
+    "category": "mekanism.generators",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "mekanism:solar_generator": {
+    "category": "mekanism.generators",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "mekanism:wind_generator": {
+    "category": "mekanism.generators",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:ingot_bronze": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "mekanism:ingot_lead": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "mekanism:ingot_osmium": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "mekanism:ingot_refined_glowstone": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "mekanism:ingot_refined_obsidian": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "mekanism:ingot_steel": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 35
+  },
+  "mekanism:ingot_tin": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "mekanism:ingot_uranium": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 25
+  },
+  "mekanism:nugget_lead": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "mekanism:nugget_osmium": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "mekanism:nugget_refined_glowstone": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "mekanism:nugget_refined_obsidian": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 56,
+    "unit_sell": 17
+  },
+  "mekanism:nugget_steel": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 14,
+    "unit_sell": 4
+  },
+  "mekanism:nugget_tin": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "mekanism:nugget_uranium": {
+    "category": "mekanism.ingots",
+    "stack": 64,
+    "unit_buy": 9,
+    "unit_sell": 3
+  },
+  "mekanism:advanced_logistical_transporter": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "mekanism:advanced_universal_cable": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "mekanism:basic_logistical_transporter": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "mekanism:basic_mechanical_pipe": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "mekanism:basic_pressurized_tube": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "mekanism:basic_thermodynamic_conductor": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "mekanism:basic_universal_cable": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "mekanism:elite_logistical_transporter": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "mekanism:elite_universal_cable": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 350,
+    "unit_sell": 105
+  },
+  "mekanism:ultimate_logistical_transporter": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "mekanism:ultimate_universal_cable": {
+    "category": "mekanism.logistics",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "mekanism:chemical_crystallizer": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:chemical_dissolution_chamber": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:chemical_infuser": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "mekanism:chemical_oxidizer": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "mekanism:chemical_washer": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "mekanism:combiner": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "mekanism:crusher": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "mekanism:digital_miner": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 15000,
+    "unit_sell": 4500
+  },
+  "mekanism:electric_pump": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "mekanism:electrolytic_separator": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1800,
+    "unit_sell": 540
+  },
+  "mekanism:energized_smelter": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "mekanism:enrichment_chamber": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "mekanism:fluidic_plenisher": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "mekanism:formulaic_assemblicator": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:laser": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "mekanism:laser_amplifier": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 5500,
+    "unit_sell": 1650
+  },
+  "mekanism:metallurgic_infuser": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 900,
+    "unit_sell": 270
+  },
+  "mekanism:osmium_compressor": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "mekanism:precision_sawmill": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "mekanism:pressurized_reaction_chamber": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:purification_chamber": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "mekanism:quantum_entangloporter": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 8000,
+    "unit_sell": 2400
+  },
+  "mekanism:rotary_condensentrator": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "mekanism:solar_neutron_activator": {
+    "category": "mekanism.machines",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "mekanism:deepslate_ore_lead": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "mekanism:deepslate_ore_osmium": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10
+  },
+  "mekanism:deepslate_ore_tin": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8
+  },
+  "mekanism:deepslate_ore_uranium": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 18
+  },
+  "mekanism:ore_fluorite": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 12
+  },
+  "mekanism:ore_lead": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 7
+  },
+  "mekanism:ore_osmium": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8
+  },
+  "mekanism:ore_tin": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6
+  },
+  "mekanism:ore_uranium": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 15
+  },
+  "mekanism:raw_lead": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "mekanism:raw_osmium": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "mekanism:raw_tin": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "mekanism:raw_uranium": {
+    "category": "mekanism.ores",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 25
+  },
+  "mekanism:advanced_bin": {
+    "category": "mekanism.storage",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "mekanism:basic_bin": {
+    "category": "mekanism.storage",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "mekanism:elite_bin": {
+    "category": "mekanism.storage",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "mekanism:ultimate_bin": {
+    "category": "mekanism.storage",
+    "stack": 64,
+    "unit_buy": 10000,
+    "unit_sell": 3000
+  },
+  "mekanism:canteen": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "mekanism:configurator": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "mekanism:dosimeter": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "mekanism:electric_bow": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "mekanism:gauge_dropper": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "mekanism:geiger_counter": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "mekanism:network_reader": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "mekanism:osmium_axe": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 130,
+    "unit_sell": 39
+  },
+  "mekanism:osmium_hoe": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "mekanism:osmium_paxel": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "mekanism:osmium_pickaxe": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 130,
+    "unit_sell": 39
+  },
+  "mekanism:osmium_shovel": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "mekanism:osmium_sword": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 110,
+    "unit_sell": 33
+  },
+  "mekanism:seismic_reader": {
+    "category": "mekanism.tools",
+    "stack": 1,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "modern_industrialization:digital_circuit": {
+    "category": "modern_ind.circuits",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "modern_industrialization:electronic_circuit": {
+    "category": "modern_ind.circuits",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "modern_industrialization:processing_unit": {
+    "category": "modern_ind.circuits",
+    "stack": 64,
+    "unit_buy": 2500,
+    "unit_sell": 750
+  },
+  "modern_industrialization:quantum_circuit": {
+    "category": "modern_ind.circuits",
+    "stack": 64,
+    "unit_buy": 10000,
+    "unit_sell": 3000
+  },
+  "modern_industrialization:conveyor": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "modern_industrialization:large_motor": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "modern_industrialization:large_piston": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "modern_industrialization:large_pump": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "modern_industrialization:motor": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "modern_industrialization:piston": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "modern_industrialization:pump": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "modern_industrialization:robot_arm": {
+    "category": "modern_ind.components",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "modern_industrialization:aluminum_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 35,
+    "unit_sell": 10
+  },
+  "modern_industrialization:iridium_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "modern_industrialization:kanthal_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "modern_industrialization:stainless_steel_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "modern_industrialization:steel_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 35
+  },
+  "modern_industrialization:steel_plate": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 140,
+    "unit_sell": 42
+  },
+  "modern_industrialization:superconductor_cable": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "modern_industrialization:titanium_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "modern_industrialization:tungsten_ingot": {
+    "category": "modern_ind.materials",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "mysticalagriculture:supremium_boots": {
+    "category": "mystical.armor",
+    "stack": 1,
+    "unit_buy": 4000,
+    "unit_sell": 1200
+  },
+  "mysticalagriculture:supremium_chestplate": {
+    "category": "mystical.armor",
+    "stack": 1,
+    "unit_buy": 8000,
+    "unit_sell": 2400
+  },
+  "mysticalagriculture:supremium_helmet": {
+    "category": "mystical.armor",
+    "stack": 1,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "mysticalagriculture:supremium_leggings": {
+    "category": "mystical.armor",
+    "stack": 1,
+    "unit_buy": 7000,
+    "unit_sell": 2100
+  },
+  "mysticalagriculture:imperium_block": {
+    "category": "mystical.blocks",
+    "stack": 64,
+    "unit_buy": 2700,
+    "unit_sell": 720
+  },
+  "mysticalagriculture:inferium_block": {
+    "category": "mystical.blocks",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 9
+  },
+  "mysticalagriculture:prudentium_block": {
+    "category": "mystical.blocks",
+    "stack": 64,
+    "unit_buy": 180,
+    "unit_sell": 45
+  },
+  "mysticalagriculture:supremium_block": {
+    "category": "mystical.blocks",
+    "stack": 64,
+    "unit_buy": 9000,
+    "unit_sell": 2250
+  },
+  "mysticalagriculture:tertium_block": {
+    "category": "mystical.blocks",
+    "stack": 64,
+    "unit_buy": 720,
+    "unit_sell": 180
+  },
+  "mysticalagriculture:imperium_essence": {
+    "category": "mystical.essences",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:inferium_essence": {
+    "category": "mystical.essences",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 1
+  },
+  "mysticalagriculture:insanium_essence": {
+    "category": "mystical.essences",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1250
+  },
+  "mysticalagriculture:prudentium_essence": {
+    "category": "mystical.essences",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 5
+  },
+  "mysticalagriculture:supremium_essence": {
+    "category": "mystical.essences",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 250
+  },
+  "mysticalagriculture:tertium_essence": {
+    "category": "mystical.essences",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 20
+  },
+  "mysticalagriculture:blaze_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 300
+  },
+  "mysticalagriculture:coal_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 60
+  },
+  "mysticalagriculture:copper_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 60
+  },
+  "mysticalagriculture:creeper_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 100
+  },
+  "mysticalagriculture:diamond_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1000
+  },
+  "mysticalagriculture:dirt_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 20
+  },
+  "mysticalagriculture:emerald_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 600
+  },
+  "mysticalagriculture:enderman_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 400
+  },
+  "mysticalagriculture:experience_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 400
+  },
+  "mysticalagriculture:ghast_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 500
+  },
+  "mysticalagriculture:glowstone_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 100
+  },
+  "mysticalagriculture:gold_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 300
+  },
+  "mysticalagriculture:ice_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 40
+  },
+  "mysticalagriculture:imperium_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1500
+  },
+  "mysticalagriculture:inferium_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50
+  },
+  "mysticalagriculture:iron_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 100
+  },
+  "mysticalagriculture:lapis_lazuli_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:netherite_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3000
+  },
+  "mysticalagriculture:obsidian_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 200
+  },
+  "mysticalagriculture:prudentium_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 200
+  },
+  "mysticalagriculture:quartz_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:redstone_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:skeleton_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:slime_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 120
+  },
+  "mysticalagriculture:spider_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:stone_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 30
+  },
+  "mysticalagriculture:supremium_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 4000
+  },
+  "mysticalagriculture:tertium_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 500
+  },
+  "mysticalagriculture:water_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 35
+  },
+  "mysticalagriculture:wither_skeleton_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 600
+  },
+  "mysticalagriculture:wood_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 25
+  },
+  "mysticalagriculture:zombie_seeds": {
+    "category": "mystical.seeds",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 80
+  },
+  "mysticalagriculture:supremium_axe": {
+    "category": "mystical.tools",
+    "stack": 1,
+    "unit_buy": 4500,
+    "unit_sell": 1350
+  },
+  "mysticalagriculture:supremium_hoe": {
+    "category": "mystical.tools",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "mysticalagriculture:supremium_pickaxe": {
+    "category": "mystical.tools",
+    "stack": 1,
+    "unit_buy": 4500,
+    "unit_sell": 1350
+  },
+  "mysticalagriculture:supremium_shovel": {
+    "category": "mystical.tools",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "mysticalagriculture:supremium_sword": {
+    "category": "mystical.tools",
+    "stack": 1,
+    "unit_buy": 4000,
+    "unit_sell": 1200
+  },
+  "occultism:spirit_attuned_gem": {
+    "category": "occultism.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "occultism:dimensional_matrix": {
+    "category": "occultism.machines",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "occultism:golden_sacrificial_bowl": {
+    "category": "occultism.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "occultism:sacrificial_bowl": {
+    "category": "occultism.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "occultism:stable_wormhole": {
+    "category": "occultism.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "occultism:storage_controller": {
+    "category": "occultism.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "occultism:datura": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "occultism:iesnium_ingot": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "occultism:iesnium_ore": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 100
+  },
+  "occultism:otherstone": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "occultism:otherworld_log": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 4
+  },
+  "occultism:silver_ingot": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "occultism:silver_ore": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 18
+  },
+  "occultism:spirit_fire": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "occultism:tallow": {
+    "category": "occultism.materials",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "occultism:book_of_binding_empty": {
+    "category": "occultism.tools",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "occultism:chalk_gold": {
+    "category": "occultism.tools",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "occultism:chalk_purple": {
+    "category": "occultism.tools",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "occultism:chalk_red": {
+    "category": "occultism.tools",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "occultism:chalk_white": {
+    "category": "occultism.tools",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "minecraft:amethyst_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "minecraft:amethyst_cluster": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 7
+  },
+  "minecraft:amethyst_shard": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 10,
+    "unit_sell": 3
+  },
+  "minecraft:ancient_debris": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 48
+  },
+  "minecraft:coal": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:coal_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "minecraft:coal_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3
+  },
+  "minecraft:copper_ingot": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:copper_nugget": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1
+  },
+  "minecraft:copper_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 3
+  },
+  "minecraft:deepslate_coal_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 4
+  },
+  "minecraft:deepslate_copper_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 4
+  },
+  "minecraft:deepslate_diamond_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 330
+  },
+  "minecraft:deepslate_emerald_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 93
+  },
+  "minecraft:deepslate_gold_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 26
+  },
+  "minecraft:deepslate_iron_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6
+  },
+  "minecraft:deepslate_lapis_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 11
+  },
+  "minecraft:deepslate_redstone_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 10
+  },
+  "minecraft:diamond": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 280,
+    "unit_sell": 84
+  },
+  "minecraft:diamond_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 2520,
+    "unit_sell": 756
+  },
+  "minecraft:diamond_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 300
+  },
+  "minecraft:emerald": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "minecraft:emerald_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 900,
+    "unit_sell": 270
+  },
+  "minecraft:emerald_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 90
+  },
+  "minecraft:gold_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 540,
+    "unit_sell": 162
+  },
+  "minecraft:gold_ingot": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "minecraft:gold_nugget": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 2
+  },
+  "minecraft:gold_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 26
+  },
+  "minecraft:iron_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 135,
+    "unit_sell": 41
+  },
+  "minecraft:iron_ingot": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 5
+  },
+  "minecraft:iron_nugget": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 1
+  },
+  "minecraft:iron_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 6
+  },
+  "minecraft:lapis_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 14
+  },
+  "minecraft:lapis_lazuli": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:lapis_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 11
+  },
+  "minecraft:nether_gold_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "minecraft:netherite_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 7560,
+    "unit_sell": 2268
+  },
+  "minecraft:netherite_ingot": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 840,
+    "unit_sell": 252
+  },
+  "minecraft:netherite_scrap": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "minecraft:raw_copper": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:raw_copper_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 8
+  },
+  "minecraft:raw_gold": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "minecraft:raw_gold_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 162
+  },
+  "minecraft:raw_iron": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 15,
+    "unit_sell": 5
+  },
+  "minecraft:raw_iron_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 41
+  },
+  "minecraft:redstone": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:redstone_block": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 27,
+    "unit_sell": 8
+  },
+  "minecraft:redstone_ore": {
+    "category": "ores",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 9
+  },
+  "pneumaticcraft:pneumatic_boots": {
+    "category": "pneumaticcraft.armor",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "pneumaticcraft:pneumatic_chestplate": {
+    "category": "pneumaticcraft.armor",
+    "stack": 1,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "pneumaticcraft:pneumatic_helmet": {
+    "category": "pneumaticcraft.armor",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "pneumaticcraft:pneumatic_leggings": {
+    "category": "pneumaticcraft.armor",
+    "stack": 1,
+    "unit_buy": 4000,
+    "unit_sell": 1200
+  },
+  "pneumaticcraft:advanced_air_compressor": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "pneumaticcraft:advanced_liquid_compressor": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "pneumaticcraft:air_compressor": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "pneumaticcraft:assembly_controller": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "pneumaticcraft:assembly_drill": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 2500,
+    "unit_sell": 750
+  },
+  "pneumaticcraft:assembly_laser": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 2500,
+    "unit_sell": 750
+  },
+  "pneumaticcraft:assembly_platform": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "pneumaticcraft:liquid_compressor": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "pneumaticcraft:pressure_chamber_glass": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 250,
+    "unit_sell": 75
+  },
+  "pneumaticcraft:pressure_chamber_interface": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "pneumaticcraft:pressure_chamber_valve": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "pneumaticcraft:pressure_chamber_wall": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "pneumaticcraft:thermopneumatic_processing_plant": {
+    "category": "pneumaticcraft.machines",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "pneumaticcraft:ingot_compressed_iron": {
+    "category": "pneumaticcraft.materials",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "pneumaticcraft:advanced_pressure_tube": {
+    "category": "pneumaticcraft.tubes",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "pneumaticcraft:pressure_tube": {
+    "category": "pneumaticcraft.tubes",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "powah:capacitor_basic": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "powah:capacitor_basic_tiny": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "powah:capacitor_blazing": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "powah:capacitor_hardened": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "powah:capacitor_niotic": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "powah:capacitor_nitro": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "powah:capacitor_spirited": {
+    "category": "powah.components",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "powah:ender_cell_basic": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "powah:ender_cell_blazing": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 10000,
+    "unit_sell": 3000
+  },
+  "powah:ender_cell_hardened": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 4000,
+    "unit_sell": 1200
+  },
+  "powah:ender_cell_niotic": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 25000,
+    "unit_sell": 7500
+  },
+  "powah:ender_cell_nitro": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 150000,
+    "unit_sell": 45000
+  },
+  "powah:ender_cell_spirited": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 60000,
+    "unit_sell": 18000
+  },
+  "powah:ender_cell_starter": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "powah:energy_cell_basic": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 240,
+    "unit_sell": 75
+  },
+  "powah:energy_cell_blazing": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 1600,
+    "unit_sell": 500
+  },
+  "powah:energy_cell_hardened": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 640,
+    "unit_sell": 200
+  },
+  "powah:energy_cell_niotic": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 4000,
+    "unit_sell": 1250
+  },
+  "powah:energy_cell_nitro": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 24000,
+    "unit_sell": 7500
+  },
+  "powah:energy_cell_spirited": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 9600,
+    "unit_sell": 3000
+  },
+  "powah:energy_cell_starter": {
+    "category": "powah.energy",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 25
+  },
+  "powah:furnator_basic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 33
+  },
+  "powah:furnator_blazing": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 133
+  },
+  "powah:furnator_hardened": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 66
+  },
+  "powah:furnator_niotic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 266
+  },
+  "powah:furnator_nitro": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 3200,
+    "unit_sell": 1066
+  },
+  "powah:furnator_spirited": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 1600,
+    "unit_sell": 533
+  },
+  "powah:furnator_starter": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 16
+  },
+  "powah:magmator_basic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 120,
+    "unit_sell": 40
+  },
+  "powah:magmator_blazing": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 480,
+    "unit_sell": 160
+  },
+  "powah:magmator_hardened": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 240,
+    "unit_sell": 80
+  },
+  "powah:magmator_niotic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 960,
+    "unit_sell": 320
+  },
+  "powah:magmator_nitro": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 3840,
+    "unit_sell": 1280
+  },
+  "powah:magmator_spirited": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 1920,
+    "unit_sell": 640
+  },
+  "powah:magmator_starter": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 20
+  },
+  "powah:solar_panel_basic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 50
+  },
+  "powah:solar_panel_blazing": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 200
+  },
+  "powah:solar_panel_hardened": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 100
+  },
+  "powah:solar_panel_niotic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 400
+  },
+  "powah:solar_panel_nitro": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 4800,
+    "unit_sell": 1600
+  },
+  "powah:solar_panel_spirited": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 2400,
+    "unit_sell": 800
+  },
+  "powah:solar_panel_starter": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 75,
+    "unit_sell": 25
+  },
+  "powah:thermo_generator_basic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 90,
+    "unit_sell": 30
+  },
+  "powah:thermo_generator_blazing": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 360,
+    "unit_sell": 120
+  },
+  "powah:thermo_generator_hardened": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 180,
+    "unit_sell": 60
+  },
+  "powah:thermo_generator_niotic": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 720,
+    "unit_sell": 240
+  },
+  "powah:thermo_generator_nitro": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 2880,
+    "unit_sell": 960
+  },
+  "powah:thermo_generator_spirited": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 1440,
+    "unit_sell": 480
+  },
+  "powah:thermo_generator_starter": {
+    "category": "powah.generators",
+    "stack": 64,
+    "unit_buy": 45,
+    "unit_sell": 15
+  },
+  "powah:reactor_basic": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "powah:reactor_blazing": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 30000,
+    "unit_sell": 9000
+  },
+  "powah:reactor_hardened": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 12000,
+    "unit_sell": 3600
+  },
+  "powah:reactor_niotic": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 75000,
+    "unit_sell": 22500
+  },
+  "powah:reactor_nitro": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 450000,
+    "unit_sell": 135000
+  },
+  "powah:reactor_spirited": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 180000,
+    "unit_sell": 54000
+  },
+  "powah:reactor_starter": {
+    "category": "powah.machines",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "powah:crystal_blazing": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "powah:crystal_niotic": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "powah:crystal_nitro": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "powah:crystal_spirited": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 600,
+    "unit_sell": 180
+  },
+  "powah:dry_ice": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "powah:steel_energized": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "powah:uraninite": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 30
+  },
+  "powah:uraninite_raw": {
+    "category": "powah.materials",
+    "stack": 64,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "refinedstorage:advanced_processor": {
+    "category": "refinedstorage.components",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "refinedstorage:basic_processor": {
+    "category": "refinedstorage.components",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "refinedstorage:improved_processor": {
+    "category": "refinedstorage.components",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "refinedstorage:processor_binding": {
+    "category": "refinedstorage.materials",
+    "stack": 64,
+    "unit_buy": 20,
+    "unit_sell": 6
+  },
+  "refinedstorage:quartz_enriched_copper": {
+    "category": "refinedstorage.materials",
+    "stack": 64,
+    "unit_buy": 40,
+    "unit_sell": 12
+  },
+  "refinedstorage:silicon": {
+    "category": "refinedstorage.materials",
+    "stack": 64,
+    "unit_buy": 25,
+    "unit_sell": 7
+  },
+  "refinedstorage:cable": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "refinedstorage:constructor": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "refinedstorage:controller": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "refinedstorage:crafter": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "refinedstorage:crafting_grid": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "refinedstorage:destructor": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "refinedstorage:disk_drive": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "refinedstorage:exporter": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "refinedstorage:external_storage": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "refinedstorage:grid": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "refinedstorage:importer": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "refinedstorage:interface": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "refinedstorage:pattern_grid": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "refinedstorage:wireless_transmitter": {
+    "category": "refinedstorage.network",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "refinedstorage:16k_storage_part": {
+    "category": "refinedstorage.storage",
+    "stack": 64,
+    "unit_buy": 4000,
+    "unit_sell": 1200
+  },
+  "refinedstorage:1k_storage_part": {
+    "category": "refinedstorage.storage",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "refinedstorage:4k_storage_part": {
+    "category": "refinedstorage.storage",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "refinedstorage:64k_storage_part": {
+    "category": "refinedstorage.storage",
+    "stack": 64,
+    "unit_buy": 12000,
+    "unit_sell": 3600
+  },
+  "silentgear:blueprint_axe": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "silentgear:blueprint_boots": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "silentgear:blueprint_chestplate": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "silentgear:blueprint_helmet": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "silentgear:blueprint_leggings": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 120,
+    "unit_sell": 36
+  },
+  "silentgear:blueprint_pickaxe": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "silentgear:blueprint_shovel": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "silentgear:blueprint_sword": {
+    "category": "silentgear.blueprints",
+    "stack": 1,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "silentgear:azure_silver_dust": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 42
+  },
+  "silentgear:azure_silver_ingot": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "silentgear:azure_silver_ore": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 50
+  },
+  "silentgear:blaze_gold_dust": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 55
+  },
+  "silentgear:blaze_gold_ingot": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "silentgear:crimson_iron_dust": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 28
+  },
+  "silentgear:crimson_iron_ingot": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "silentgear:crimson_iron_ore": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 35
+  },
+  "silentgear:tyrian_steel_dust": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 140
+  },
+  "silentgear:tyrian_steel_ingot": {
+    "category": "silentgear.materials",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "sophisticatedbackpacks:backpack": {
+    "category": "sophisticated.backpacks",
+    "stack": 1,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "sophisticatedbackpacks:diamond_backpack": {
+    "category": "sophisticated.backpacks",
+    "stack": 1,
+    "unit_buy": 1600,
+    "unit_sell": 480
+  },
+  "sophisticatedbackpacks:gold_backpack": {
+    "category": "sophisticated.backpacks",
+    "stack": 1,
+    "unit_buy": 640,
+    "unit_sell": 192
+  },
+  "sophisticatedbackpacks:iron_backpack": {
+    "category": "sophisticated.backpacks",
+    "stack": 1,
+    "unit_buy": 240,
+    "unit_sell": 72
+  },
+  "sophisticatedbackpacks:netherite_backpack": {
+    "category": "sophisticated.backpacks",
+    "stack": 1,
+    "unit_buy": 4000,
+    "unit_sell": 1200
+  },
+  "sophisticatedstorage:barrel": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "sophisticatedstorage:chest": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 60,
+    "unit_sell": 18
+  },
+  "sophisticatedstorage:diamond_barrel": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 1000,
+    "unit_sell": 300
+  },
+  "sophisticatedstorage:diamond_chest": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 1200,
+    "unit_sell": 360
+  },
+  "sophisticatedstorage:diamond_shulker_box": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "sophisticatedstorage:gold_barrel": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 400,
+    "unit_sell": 120
+  },
+  "sophisticatedstorage:gold_chest": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 480,
+    "unit_sell": 144
+  },
+  "sophisticatedstorage:gold_shulker_box": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 800,
+    "unit_sell": 240
+  },
+  "sophisticatedstorage:iron_barrel": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 150,
+    "unit_sell": 45
+  },
+  "sophisticatedstorage:iron_chest": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 180,
+    "unit_sell": 54
+  },
+  "sophisticatedstorage:iron_shulker_box": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "sophisticatedstorage:netherite_barrel": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 2500,
+    "unit_sell": 750
+  },
+  "sophisticatedstorage:netherite_chest": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "sophisticatedstorage:netherite_shulker_box": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 5000,
+    "unit_sell": 1500
+  },
+  "sophisticatedstorage:shulker_box": {
+    "category": "sophisticated.storage",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "minecraft:copper_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 11,
+    "unit_sell": 3
+  },
+  "minecraft:copper_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:copper_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 11,
+    "unit_sell": 3
+  },
+  "minecraft:copper_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:diamond_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 842,
+    "unit_sell": 253
+  },
+  "minecraft:diamond_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 562,
+    "unit_sell": 169
+  },
+  "minecraft:diamond_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 842,
+    "unit_sell": 253
+  },
+  "minecraft:diamond_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 282,
+    "unit_sell": 85
+  },
+  "minecraft:fishing_rod": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 7,
+    "unit_sell": 2
+  },
+  "minecraft:golden_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 182,
+    "unit_sell": 55
+  },
+  "minecraft:golden_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 122,
+    "unit_sell": 37
+  },
+  "minecraft:golden_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 182,
+    "unit_sell": 55
+  },
+  "minecraft:golden_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 62,
+    "unit_sell": 19
+  },
+  "minecraft:iron_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 47,
+    "unit_sell": 14
+  },
+  "minecraft:iron_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 32,
+    "unit_sell": 10
+  },
+  "minecraft:iron_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 47,
+    "unit_sell": 14
+  },
+  "minecraft:iron_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 17,
+    "unit_sell": 5
+  },
+  "minecraft:netherite_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 3092,
+    "unit_sell": 928
+  },
+  "minecraft:netherite_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 2842,
+    "unit_sell": 853
+  },
+  "minecraft:netherite_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 3092,
+    "unit_sell": 928
+  },
+  "minecraft:netherite_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 2592,
+    "unit_sell": 778
+  },
+  "minecraft:shears": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 30,
+    "unit_sell": 9
+  },
+  "minecraft:stone_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:stone_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "minecraft:stone_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:stone_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:wooden_axe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:wooden_hoe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 6,
+    "unit_sell": 2
+  },
+  "minecraft:wooden_pickaxe": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 8,
+    "unit_sell": 2
+  },
+  "minecraft:wooden_shovel": {
+    "category": "tools",
+    "stack": 1,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "minecraft:elytra": {
+    "category": "transport",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 1050
+  },
+  "twilightforest:naga_scale": {
+    "category": "twilight.drops",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 200
+  },
+  "twilightforest:tower_key": {
+    "category": "twilight.keys",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 300
+  },
+  "twilightforest:fiery_ingot": {
+    "category": "twilight.materials",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 150
+  },
+  "twilightforest:ironwood_ingot": {
+    "category": "twilight.materials",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "twilightforest:knightmetal_ingot": {
+    "category": "twilight.materials",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 90
+  },
+  "twilightforest:magic_map_focus": {
+    "category": "twilight.materials",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "twilightforest:steeleaf_ingot": {
+    "category": "twilight.materials",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 60
+  },
+  "twilightforest:transformation_powder": {
+    "category": "twilight.materials",
+    "stack": 64,
+    "unit_buy": 50,
+    "unit_sell": 15
+  },
+  "twilightforest:trophy_hydra": {
+    "category": "twilight.trophies",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 5000
+  },
+  "twilightforest:trophy_lich": {
+    "category": "twilight.trophies",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 3000
+  },
+  "twilightforest:trophy_naga": {
+    "category": "twilight.trophies",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 2000
+  },
+  "twilightforest:trophy_snow_queen": {
+    "category": "twilight.trophies",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 8000
+  },
+  "twilightforest:trophy_ur_ghast": {
+    "category": "twilight.trophies",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 7000
+  },
+  "minecraft:beacon": {
+    "category": "utility",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 926
+  },
+  "minecraft:experience_bottle": {
+    "category": "utility",
+    "stack": 64,
+    "unit_buy": 30,
+    "unit_sell": 8
+  },
+  "minecraft:flint_and_steel": {
+    "category": "utility",
+    "stack": 1,
+    "unit_buy": 25,
+    "unit_sell": 8
+  },
+  "minecraft:name_tag": {
+    "category": "utility",
+    "stack": 64,
+    "unit_buy": 100,
+    "unit_sell": 30
+  },
+  "minecraft:saddle": {
+    "category": "utility",
+    "stack": 1,
+    "unit_buy": 80,
+    "unit_sell": 24
+  },
+  "minecraft:totem_of_undying": {
+    "category": "utility",
+    "stack": 1,
+    "unit_buy": 3000,
+    "unit_sell": 900
+  },
+  "waystones:bound_scroll": {
+    "category": "waystones",
+    "stack": 64,
+    "unit_buy": 300,
+    "unit_sell": 0
+  },
+  "waystones:mossy_waystone": {
+    "category": "waystones",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "waystones:return_scroll": {
+    "category": "waystones",
+    "stack": 64,
+    "unit_buy": 200,
+    "unit_sell": 0
+  },
+  "waystones:sandy_waystone": {
+    "category": "waystones",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "waystones:warp_scroll": {
+    "category": "waystones",
+    "stack": 64,
+    "unit_buy": 500,
+    "unit_sell": 0
+  },
+  "waystones:warp_stone": {
+    "category": "waystones",
+    "stack": 1,
+    "unit_buy": 2000,
+    "unit_sell": 600
+  },
+  "waystones:waystone": {
+    "category": "waystones",
+    "stack": 64,
+    "unit_buy": 1500,
+    "unit_sell": 450
+  },
+  "minecraft:arrow": {
+    "category": "weapons",
+    "stack": 64,
+    "unit_buy": 2,
+    "unit_sell": 1
+  },
+  "minecraft:bow": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 9,
+    "unit_sell": 3
+  },
+  "minecraft:copper_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 5,
+    "unit_sell": 2
+  },
+  "minecraft:copper_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 7,
+    "unit_sell": 2
+  },
+  "minecraft:crossbow": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 31,
+    "unit_sell": 9
+  },
+  "minecraft:diamond_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 282,
+    "unit_sell": 85
+  },
+  "minecraft:diamond_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 561,
+    "unit_sell": 168
+  },
+  "minecraft:golden_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 62,
+    "unit_sell": 19
+  },
+  "minecraft:golden_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 121,
+    "unit_sell": 36
+  },
+  "minecraft:iron_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 17,
+    "unit_sell": 5
+  },
+  "minecraft:iron_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 31,
+    "unit_sell": 9
+  },
+  "minecraft:mace": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 1071
+  },
+  "minecraft:netherite_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 2622,
+    "unit_sell": 787
+  },
+  "minecraft:netherite_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 2841,
+    "unit_sell": 852
+  },
+  "minecraft:spectral_arrow": {
+    "category": "weapons",
+    "stack": 64,
+    "unit_buy": 0,
+    "unit_sell": 2
+  },
+  "minecraft:stone_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:stone_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 3,
+    "unit_sell": 1
+  },
+  "minecraft:trident": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 0,
+    "unit_sell": 150
+  },
+  "minecraft:wooden_spear": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 4,
+    "unit_sell": 1
+  },
+  "minecraft:wooden_sword": {
+    "category": "weapons",
+    "stack": 1,
+    "unit_buy": 5,
+    "unit_sell": 2
+  }
+};
+    
+    // State variables
+    let filteredData = [];
+    let currentPage = 1;
+    let itemsPerPage = 50;
+    let currentSort = { column: null, ascending: true };
+    let searchTimeout = null;
+
+    // Pre-process data once
+    const processedItems = Object.entries(items).map(([id, info]) => ({
+        id,
+        name: id.split(':')[1].replace(/_/g, ' '),
+        category: info.category,
+        stack: info.stack,
+        unit_buy: info.unit_buy,
+        unit_sell: info.unit_sell
+    }));
+
+    // Optimized filtering function
+    function filterData(searchTerm) {
+        if (!searchTerm) return processedItems;
+        const term = searchTerm.toLowerCase();
+        return processedItems.filter(item => 
+            item.name.includes(term) || item.category.includes(term)
+        );
+    }
+
+    // Optimized sorting function
+    function sortData(data, columnIndex) {
+        const sortKeys = ['name', 'category', 'stack', 'unit_buy', 'unit_sell'];
+        const key = sortKeys[columnIndex];
+        
+        return [...data].sort((a, b) => {
+            let valA = a[key];
+            let valB = b[key];
+            
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+            
+            if (valA < valB) return currentSort.ascending ? -1 : 1;
+            if (valA > valB) return currentSort.ascending ? 1 : -1;
+            return 0;
+        });
+    }
+
+    // Render table with pagination (MUCH more efficient)
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
+        
+        // Use array and single innerHTML (100x faster)
+        const rows = pageData.map(item => 
+            `<tr>
+                <td>${item.name}</td>
+                <td><span class="category-tag">${item.category}</span></td>
+                <td>${item.stack}</td>
+                <td class="price-buy ${item.unit_buy === 0 ? 'zero' : ''}">${item.unit_buy}</td>
+                <td class="price-sell">${item.unit_sell}</td>
+            </tr>`
+        );
+        
+        tbody.innerHTML = rows.join('');
+        updateControls();
+    }
+
+    // Update pagination controls
+    function updateControls() {
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+        const resultsCount = document.getElementById('resultsCount');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        resultsCount.textContent = `${filteredData.length} items found`;
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    // Page navigation
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    }
+
+    // Search with debounce (optimized)
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filteredData = filterData(e.target.value);
+            if (currentSort.column !== null) {
+                filteredData = sortData(filteredData, currentSort.column);
+            }
+            currentPage = 1;
+            renderTable();
+        }, 300);
+    });
+
+    // Sort table (optimized)
+    function sortTable(columnIndex) {
+        if (currentSort.column === columnIndex) {
+            currentSort.ascending = !currentSort.ascending;
+        } else {
+            currentSort.column = columnIndex;
+            currentSort.ascending = true;
+        }
+        
+        filteredData = sortData(filteredData, columnIndex);
+        renderTable();
+    }
+
+    // Initialize
+    filteredData = processedItems;
+    renderTable();
+</script>
+</body>
+</html>
