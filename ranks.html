@@ -1,165 +1,830 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATM10 Ranks - iSAlexHere</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        h1 { color: #00d4ff; }
-        table {
-            border-collapse: collapse;
-            width: 90%;
-            max-width: 1000px;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-        th {
-            background-color: #2c2c2c;
-            color: #00d4ff;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
-        tr:hover { background-color: #252525; }
-        .rank-name { font-weight: bold; }
-        /* Colors based on your config */
-        .color-member { color: #888888; }
-        .color-novice { color: #AAAAAA; }
-        .color-traveler { color: #FFFF55; }
-        .color-explorer { color: #FFAA00; }
-        .color-scout { color: #55FF55; }
-        .color-builder { color: #55FFFF; }
-        .color-legend { color: #FFAA00; text-shadow: 0 0 5px #FFAA00; }
-        .color-atm { color: #FF55FF; font-weight: 900; text-shadow: 0 0 8px #FF55FF; }
-        .highlight { color: #00ff9d; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CelestialMC — Ranks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #05060f;
+  --bg-card: rgba(12, 15, 35, 0.7);
+  --border-glow: rgba(100, 140, 255, 0.15);
+  --text-primary: #e8ecf4;
+  --text-muted: #7a84a0;
+  --accent-blue: #4d8bff;
+  --accent-cyan: #00e5ff;
+  --accent-purple: #a855f7;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ===== STARFIELD BACKGROUND ===== */
+.starfield {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden;
+}
+.starfield .star {
+  position: absolute; border-radius: 50%; background: white;
+  animation: twinkle var(--dur) ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  0% { opacity: var(--o1); transform: scale(1); }
+  100% { opacity: var(--o2); transform: scale(1.4); }
+}
+
+.nebula {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 900px 600px at 15% 20%, rgba(77, 139, 255, 0.07), transparent),
+    radial-gradient(ellipse 700px 500px at 80% 70%, rgba(168, 85, 247, 0.06), transparent),
+    radial-gradient(ellipse 500px 400px at 50% 50%, rgba(0, 229, 255, 0.04), transparent);
+}
+
+/* ===== GRID OVERLAY ===== */
+.grid-overlay {
+  position: fixed; inset: 0; z-index: 0; opacity: 0.03;
+  background-image:
+    linear-gradient(rgba(100,180,255,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,180,255,0.5) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridShift 20s linear infinite;
+}
+@keyframes gridShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+/* ===== CONTENT ===== */
+.content { position: relative; z-index: 1; }
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 2rem; position: relative;
+}
+.hero::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+  background: linear-gradient(transparent, var(--bg-deep));
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 20px; border-radius: 40px;
+  background: rgba(77, 139, 255, 0.08);
+  border: 1px solid rgba(77, 139, 255, 0.2);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  color: var(--accent-cyan); letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 2rem;
+  animation: fadeSlideDown 0.8s ease-out both;
+}
+.hero-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-cyan);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--accent-cyan); }
+  50% { opacity: 0.4; box-shadow: 0 0 12px var(--accent-cyan); }
+}
+
+.hero-title {
+  font-family: 'Orbitron', sans-serif; font-weight: 900;
+  font-size: clamp(3rem, 8vw, 7rem); line-height: 1;
+  letter-spacing: -2px; margin-bottom: 0.5rem;
+  animation: fadeSlideDown 1s ease-out 0.2s both;
+}
+.hero-title .celestial {
+  background: linear-gradient(135deg, #4d8bff 0%, #00e5ff 40%, #a855f7 70%, #ff6bcb 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-title .mc { color: rgba(255,255,255,0.2); }
+
+.hero-subtitle {
+  font-family: 'Orbitron', sans-serif; font-size: clamp(0.9rem, 2vw, 1.3rem);
+  color: var(--text-muted); letter-spacing: 6px; text-transform: uppercase;
+  margin-bottom: 3rem;
+  animation: fadeSlideDown 1s ease-out 0.4s both;
+}
+
+.scroll-hint {
+  animation: fadeSlideDown 1s ease-out 0.8s both, floatY 3s ease-in-out infinite;
+  color: var(--text-muted); font-size: 0.85rem; letter-spacing: 2px;
+}
+.scroll-hint svg { display: block; margin: 8px auto 0; opacity: 0.4; }
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+/* ===== RANKS SECTION ===== */
+.ranks-section {
+  max-width: 1300px; margin: 0 auto; padding: 2rem 1.5rem 6rem;
+}
+
+.section-header {
+  text-align: center; margin-bottom: 4rem;
+}
+.section-header h2 {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  letter-spacing: 2px; margin-bottom: 1rem;
+}
+.section-header p {
+  color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;
+}
+.section-line {
+  width: 80px; height: 2px; margin: 1.5rem auto 0;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+}
+
+/* ===== TIMELINE LAYOUT ===== */
+.ranks-timeline { position: relative; }
+.timeline-line {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(77, 139, 255, 0.3) 10%,
+    rgba(0, 229, 255, 0.2) 50%,
+    rgba(168, 85, 247, 0.3) 90%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+}
+
+.rank-card-wrapper {
+  display: flex; align-items: center; margin-bottom: 3rem;
+  opacity: 0; transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+.rank-card-wrapper.visible {
+  opacity: 1; transform: translateY(0);
+}
+.rank-card-wrapper:nth-child(odd) { flex-direction: row; padding-right: calc(50% + 40px); }
+.rank-card-wrapper:nth-child(even) { flex-direction: row-reverse; padding-left: calc(50% + 40px); }
+
+.timeline-node {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--node-color, var(--accent-blue));
+  background: var(--bg-deep); z-index: 2;
+  box-shadow: 0 0 12px var(--node-color, var(--accent-blue));
+  transition: all 0.4s ease;
+}
+.rank-card-wrapper.visible .timeline-node {
+  background: var(--node-color, var(--accent-blue));
+}
+
+/* ===== RANK CARD ===== */
+.rank-card {
+  flex: 1; border-radius: 16px; overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--card-border, var(--border-glow));
+  backdrop-filter: blur(20px);
+  position: relative;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.rank-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 8px 40px var(--card-glow, rgba(77,139,255,0.1));
+}
+
+.rank-card-header {
+  padding: 1.5rem 1.8rem 1rem;
+  position: relative; overflow: hidden;
+}
+.rank-card-header::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--card-accent, rgba(77,139,255,0.1)), transparent 60%);
+}
+
+.rank-meta {
+  display: flex; align-items: center; gap: 12px;
+  position: relative; z-index: 1;
+}
+
+.rank-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--card-border, var(--border-glow));
+  font-family: 'Orbitron', sans-serif; font-weight: 800;
+  font-size: 0.9rem; color: var(--rank-color, #fff);
+}
+
+.rank-info { flex: 1; }
+.rank-name {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 1.3rem; color: var(--rank-color, #fff);
+  letter-spacing: 1px;
+}
+.rank-requirement {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--text-muted); letter-spacing: 1px;
+  margin-top: 2px; display: flex; align-items: center; gap: 6px;
+}
+.rank-requirement svg { opacity: 0.5; }
+
+.rank-power-badge {
+  padding: 4px 12px; border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--card-border, var(--border-glow));
+  color: var(--rank-color, #888);
+  letter-spacing: 1px;
+}
+
+.rank-card-body { padding: 0 1.8rem 1.5rem; }
+
+.perks-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-top: 1rem;
+}
+
+.perk-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.82rem; color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+.perk-item:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--card-border, var(--border-glow));
+  color: var(--text-primary);
+}
+.perk-item.new-perk {
+  border-color: var(--card-border, var(--border-glow));
+  background: rgba(var(--accent-rgb, 77,139,255), 0.06);
+}
+.perk-item.new-perk .perk-icon { color: var(--rank-color, var(--accent-cyan)); }
+
+.perk-icon {
+  font-size: 0.9rem; width: 20px; text-align: center;
+  flex-shrink: 0;
+}
+.perk-text { font-family: 'Rajdhani', sans-serif; font-weight: 500; }
+.perk-value {
+  margin-left: auto; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; color: var(--rank-color, var(--accent-cyan));
+  flex-shrink: 0;
+}
+
+/* ===== SPECIAL RANKS (Staff) ===== */
+.staff-section {
+  max-width: 1300px; margin: 0 auto; padding: 0 1.5rem 6rem;
+}
+.staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
+
+.staff-card {
+  border-radius: 16px; overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(20px);
+  padding: 2rem; position: relative;
+  opacity: 0; transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.staff-card.visible { opacity: 1; transform: translateY(0); }
+
+.staff-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--rank-color), transparent);
+}
+
+/* ===== PROGRESS BAR in cards ===== */
+.stats-bar {
+  margin-top: 1.2rem; display: flex; gap: 1rem; flex-wrap: wrap;
+}
+.stat-item {
+  flex: 1; min-width: 100px;
+  padding: 10px 14px; border-radius: 10px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; color: var(--text-muted);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 1.1rem; color: var(--rank-color, #fff);
+}
+
+/* ===== FLOATING PARTICLES ===== */
+.particle {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  animation: floatParticle var(--dur) linear infinite;
+}
+@keyframes floatParticle {
+  0% { transform: translate(0, 100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: var(--o); }
+  90% { opacity: var(--o); }
+  100% { transform: translate(var(--dx), -100px) rotate(360deg); opacity: 0; }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .timeline-line { display: none; }
+  .timeline-node { display: none; }
+  .rank-card-wrapper:nth-child(odd),
+  .rank-card-wrapper:nth-child(even) {
+    flex-direction: column; padding: 0 !important;
+  }
+  .perks-grid { grid-template-columns: 1fr; }
+  .staff-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: rgba(77,139,255,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(77,139,255,0.5); }
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center; padding: 3rem 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 1px;
+}
+.footer a { color: var(--accent-cyan); text-decoration: none; }
+
+/* ===== NAV PROGRESS BAR ===== */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 2px; z-index: 100;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple));
+  transform-origin: left; transform: scaleX(0);
+  transition: transform 0.1s linear;
+}
+</style>
 </head>
 <body>
-    <h1>ATM10 Server Rank Hierarchy</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Requirement</th>
-                <th>Homes</th>
-                <th>Claimed Chunks</th>
-                <th>Force Loaded</th>
-                <th>Special Ability</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="rank-name color-member">[Member]</td>
-                <td>Starting Rank</td>
-                <td>10</td>
-                <td>50</td>
-                <td class="highlight">10</td>
-                <td>/tpa, /spawn</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-novice">[Novice]</td>
-                <td>15 min</td>
-                <td>15</td>
-                <td>50</td>
-                <td class="highlight">12</td>
-                <td>No Home Cooldown</td>
-            </tr>
-            <tr>
-                <td class="rank-name">[Apprentice]</td>
-                <td>1 hour</td>
-                <td>20</td>
-                <td>50</td>
-                <td class="highlight">14</td>
-                <td>/back, /trashcan</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-traveler">[Traveler]</td>
-                <td>2 hours</td>
-                <td>20</td>
-                <td>50</td>
-                <td class="highlight">16</td>
-                <td>Waystones List</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-explorer">[Explorer]</td>
-                <td>3 hours</td>
-                <td>20</td>
-                <td>100</td>
-                <td class="highlight">18</td>
-                <td>/rtp (Random Teleport)</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-scout">[Scout]</td>
-                <td>5 hours</td>
-                <td>20</td>
-                <td>100</td>
-                <td class="highlight">20</td>
-                <td>/jump, No TP Warmup</td>
-            </tr>
-            <tr>
-                <td class="rank-name" style="color: #00AA00;">[Gatherer]</td>
-                <td>10 hours</td>
-                <td>20</td>
-                <td>100</td>
-                <td class="highlight">25</td>
-                <td>Portable Crafting Table</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-builder">[Builder]</td>
-                <td>15 hours</td>
-                <td>20</td>
-                <td>300</td>
-                <td class="highlight">30</td>
-                <td>Portable Stonecutter</td>
-            </tr>
-            <tr>
-                <td class="rank-name" style="color: #00AAAA;">[Engineer]</td>
-                <td>20 hours</td>
-                <td>20</td>
-                <td>300</td>
-                <td class="highlight">35</td>
-                <td>Offline Chunkloading</td>
-            </tr>
-            <tr>
-                <td class="rank-name" style="color: #AA00AA;">[Veteran]</td>
-                <td>40 hours</td>
-                <td>20</td>
-                <td>600</td>
-                <td class="highlight">50</td>
-                <td>/feed Command</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-legend">[Legend]</td>
-                <td>60 hours</td>
-                <td>20</td>
-                <td>600</td>
-                <td class="highlight">100</td>
-                <td>/heal Command</td>
-            </tr>
-            <tr>
-                <td class="rank-name color-atm">[ATM-MAKER]</td>
-                <td>100 hours</td>
-                <td>1000</td>
-                <td>2500</td>
-                <td class="highlight">250</td>
-                <td>/fly, /observable</td>
-            </tr>
-        </tbody>
-    </table>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="starfield" id="starfield"></div>
+<div class="nebula"></div>
+<div class="grid-overlay"></div>
+
+<div class="content">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge"><span class="dot"></span> ALL THE MODS 10 SERVER</div>
+    <h1 class="hero-title">
+      <span class="celestial">Celestial</span><span class="mc">MC</span>
+    </h1>
+    <p class="hero-subtitle">Rank Progression System</p>
+    <div class="scroll-hint">
+      SCROLL TO EXPLORE
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+    </div>
+  </section>
+
+  <!-- PLAYER RANKS -->
+  <section class="ranks-section">
+    <div class="section-header">
+      <h2>Player Ranks</h2>
+      <p>Progress through ranks by playing on the server. Each rank unlocks new perks, commands, and expanded claim limits.</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="ranks-timeline" id="ranksTimeline">
+      <div class="timeline-line"></div>
+      <!-- Cards injected by JS -->
+    </div>
+  </section>
+
+  <!-- STAFF RANKS -->
+  <section class="staff-section">
+    <div class="section-header">
+      <h2>Staff Ranks</h2>
+      <p>Server staff members with elevated permissions to keep CelestialMC running smoothly.</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="staff-grid" id="staffGrid"></div>
+  </section>
+
+  <footer class="footer">
+    CelestialMC &copy; 2025 — Powered by <a href="#">ATM10</a>
+  </footer>
+</div>
+
+<script>
+// ===== DATA =====
+const mcColors = {
+  '0': '#000000', '1': '#0000AA', '2': '#00AA00', '3': '#00AAAA',
+  '4': '#AA0000', '5': '#AA00AA', '6': '#FFAA00', '7': '#AAAAAA',
+  '8': '#555555', '9': '#5555FF', 'a': '#55FF55', 'b': '#55FFFF',
+  'c': '#FF5555', 'd': '#FF55FF', 'e': '#FFFF55', 'f': '#FFFFFF'
+};
+
+function parseColor(format) {
+  const match = format.match(/&([0-9a-f])/);
+  return match ? mcColors[match[1]] : '#FFFFFF';
+}
+
+function parseNameColor(format) {
+  const parts = format.split('{name}');
+  if (!parts[0]) return '#FFFFFF';
+  const matches = [...parts[0].matchAll(/&([0-9a-f])/g)];
+  return matches.length ? mcColors[matches[matches.length - 1][1]] : '#FFFFFF';
+}
+
+const playerRanks = [
+  {
+    id: 'member', name: 'Member', power: 1, requirement: 'Always Active',
+    color: parseColor('&8'), nameColor: parseNameColor('&8[Member] &7{name}'),
+    format: '&8[Member] &7{name}',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '3', new: true },
+      { icon: '⏳', text: 'Home Cooldown', value: '300s', new: true },
+      { icon: '⏱', text: 'Home Warmup', value: '5s', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '25', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '5', new: true },
+      { icon: '🔀', text: '/spawn, /tpa, /msg', value: '✓', new: true },
+      { icon: '🎒', text: 'Kit: Starter, Daily', value: '✓', new: true },
+      { icon: '💰', text: 'Economy Access', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank1', name: 'Newcomer', power: 5, requirement: '15 Minutes Playtime',
+    color: parseColor('&7'), nameColor: parseNameColor('&7[Newcomer] &f{name}'),
+    format: '&7[Newcomer] &f{name}',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '5', new: true },
+      { icon: '⏳', text: 'Home Cooldown', value: '120s', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '35', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '8', new: true },
+      { icon: '📋', text: '/help', value: '✓', new: true },
+      { icon: '🗑', text: '/trashcan', value: '✓', new: true },
+      { icon: '🎒', text: 'Kit: Weekly', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank2', name: 'Settler', power: 10, requirement: '1 Hour Playtime',
+    color: parseColor('&f'), nameColor: parseNameColor('&f[Settler] {name}'),
+    format: '&f[Settler] {name}',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '7', new: true },
+      { icon: '⏳', text: 'Home Cooldown', value: '60s', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '50', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '10', new: true },
+      { icon: '↩️', text: '/back', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank3', name: 'Wanderer', power: 15, requirement: '2 Hours Playtime',
+    color: '#FFFF55', nameColor: '#FFFF55',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '8', new: true },
+      { icon: '⏳', text: 'Home Cooldown', value: '30s', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '65', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '12', new: true },
+    ]
+  },
+  {
+    id: 'rank4', name: 'Explorer', power: 20, requirement: '4 Hours Playtime',
+    color: '#FFAA00', nameColor: '#FFAA00',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '10', new: true },
+      { icon: '⏳', text: 'Home Cooldown', value: '0s', new: true },
+      { icon: '⏱', text: 'Home Warmup', value: '3s', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '80', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '14', new: true },
+      { icon: '🎲', text: '/rtp (Random TP)', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank5', name: 'Pathfinder', power: 25, requirement: '7 Hours Playtime',
+    color: '#55FF55', nameColor: '#55FF55',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '12', new: true },
+      { icon: '⏱', text: 'Home Warmup', value: '0s', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '100', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '16', new: true },
+      { icon: '🦘', text: '/jump', value: '✓', new: true },
+      { icon: '🔨', text: '/craft (Open Crafting)', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank6', name: 'Builder', power: 30, requirement: '12 Hours Playtime',
+    color: '#55FFFF', nameColor: '#55FFFF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '14', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '125', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '20', new: true },
+      { icon: '🪨', text: '/stonecutter', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank7', name: 'Tinkerer', power: 35, requirement: '18 Hours Playtime',
+    color: '#00AAAA', nameColor: '#00AAAA',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '16', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '150', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '25', new: true },
+      { icon: '🔩', text: '/anvil, /smithing', value: '✓', new: true },
+      { icon: '☢️', text: 'Mek Radiation Check', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank8', name: 'Engineer', power: 40, requirement: '25 Hours Playtime',
+    color: '#5555FF', nameColor: '#5555FF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '18', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '200', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '30', new: true },
+      { icon: '🌐', text: 'Offline Chunkloading', value: '✓', new: true },
+      { icon: '🎩', text: '/hat', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank9', name: 'Artisan', power: 45, requirement: '35 Hours Playtime',
+    color: '#FF55FF', nameColor: '#FF55FF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '20', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '250', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '35', new: true },
+      { icon: '✏️', text: '/nick (Nickname)', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank10', name: 'Machinist', power: 50, requirement: '45 Hours Playtime',
+    color: '#00AA00', nameColor: '#55FF55',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '22', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '300', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '40', new: true },
+      { icon: '🍗', text: '/feed', value: '✓', new: true },
+      { icon: '📊', text: 'AE2 Grid Export', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank11', name: 'Veteran', power: 55, requirement: '60 Hours Playtime',
+    color: '#AA00AA', nameColor: '#FFFFFF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '25', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '400', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '50', new: true },
+      { icon: '❤️', text: '/heal', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank12', name: 'Specialist', power: 60, requirement: '80 Hours Playtime',
+    color: '#FFAA00', nameColor: '#FFFF55',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '30', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '500', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '60', new: true },
+      { icon: '👁', text: '/invsee', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank13', name: 'Expert', power: 65, requirement: '100 Hours Playtime',
+    color: '#FF5555', nameColor: '#FFFFFF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '35', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '600', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '75', new: true },
+      { icon: '📡', text: 'Observable Run', value: '✓', new: true },
+    ]
+  },
+  {
+    id: 'rank14', name: 'Master', power: 70, requirement: '150 Hours Playtime',
+    color: '#AA0000', nameColor: '#FF5555',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '40', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '800', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '100', new: true },
+    ]
+  },
+  {
+    id: 'rank15', name: 'Grandmaster', power: 80, requirement: '200 Hours Playtime',
+    color: '#AA00AA', nameColor: '#FF55FF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '50', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '1,000', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '125', new: true },
+    ]
+  },
+  {
+    id: 'rank16', name: 'Legend', power: 90, requirement: '300 Hours Playtime',
+    color: '#FFAA00', nameColor: '#FFFF55',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '75', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '1,500', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '175', new: true },
+    ]
+  },
+  {
+    id: 'rank17', name: 'Mythic', power: 95, requirement: '500 Hours Playtime',
+    color: '#FF5555', nameColor: '#AA0000',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '100', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '2,000', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '200', new: true },
+    ]
+  },
+  {
+    id: 'rank18', name: 'AllTheMaker', power: 100, requirement: '750 Hours Playtime',
+    color: '#FF55FF', nameColor: '#55FFFF',
+    perks: [
+      { icon: '🏠', text: 'Homes', value: '1,000', new: true },
+      { icon: '📍', text: 'Claimed Chunks', value: '2,500', new: true },
+      { icon: '⚡', text: 'Force Loaded', value: '250', new: true },
+      { icon: '🕊', text: '/fly', value: '✓', new: true },
+    ]
+  }
+];
+
+const staffRanks = [
+  {
+    id: 'moderator', name: 'Moderator', power: 500, requirement: 'OP Status',
+    color: '#00AA00', nameColor: '#55FF55',
+    perks: [
+      { icon: '📍', text: 'Claimed Chunks', value: '1,000' },
+      { icon: '⚡', text: 'Force Loaded', value: '500' },
+      { icon: '⌨️', text: 'All Commands', value: '✓' },
+      { icon: '🛡', text: 'Economy Admin', value: '✓' },
+    ]
+  },
+  {
+    id: 'admin', name: 'Admin', power: 1000, requirement: 'OP Status',
+    color: '#AA0000', nameColor: '#FF5555',
+    perks: [
+      { icon: '⚡', text: 'Force Loaded', value: '1,000' },
+      { icon: '⌨️', text: 'All Commands', value: '✓' },
+      { icon: '🛡', text: 'Full Economy Admin', value: '✓' },
+      { icon: '💎', text: 'Price Management', value: '✓' },
+    ]
+  }
+];
+
+// ===== RENDER =====
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return `${parseInt(hex.substring(0,2),16)},${parseInt(hex.substring(2,4),16)},${parseInt(hex.substring(4,6),16)}`;
+}
+
+function renderRankCard(rank, index) {
+  const rgb = hexToRgb(rank.color);
+  const perksHtml = rank.perks.map(p => `
+    <div class="perk-item ${p.new ? 'new-perk' : ''}">
+      <span class="perk-icon">${p.icon}</span>
+      <span class="perk-text">${p.text}</span>
+      <span class="perk-value">${p.value}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="rank-card-wrapper" data-index="${index}"
+         style="--card-border: ${rank.color}33; --card-glow: ${rank.color}22; --card-accent: rgba(${rgb},0.12); --rank-color: ${rank.color}; --node-color: ${rank.color}; --accent-rgb: ${rgb};">
+      <div class="timeline-node"></div>
+      <div class="rank-card">
+        <div class="rank-card-header">
+          <div class="rank-meta">
+            <div class="rank-icon">P${rank.power}</div>
+            <div class="rank-info">
+              <div class="rank-name">${rank.name}</div>
+              <div class="rank-requirement">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                ${rank.requirement}
+              </div>
+            </div>
+            <div class="rank-power-badge">PWR ${rank.power}</div>
+          </div>
+        </div>
+        <div class="rank-card-body">
+          <div class="stats-bar">
+            ${rank.perks.filter(p => ['Homes','Claimed Chunks','Force Loaded'].includes(p.text)).map(p => `
+              <div class="stat-item">
+                <div class="stat-label">${p.text}</div>
+                <div class="stat-value">${p.value}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="perks-grid">
+            ${rank.perks.filter(p => !['Homes','Claimed Chunks','Force Loaded'].includes(p.text)).map(p => `
+              <div class="perk-item ${p.new ? 'new-perk' : ''}">
+                <span class="perk-icon">${p.icon}</span>
+                <span class="perk-text">${p.text}</span>
+                <span class="perk-value">${p.value}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderStaffCard(rank) {
+  const rgb = hexToRgb(rank.color);
+  return `
+    <div class="staff-card" style="--card-border: ${rank.color}44; --rank-color: ${rank.color}; --accent-rgb: ${rgb};">
+      <div class="rank-meta" style="margin-bottom: 1rem;">
+        <div class="rank-icon" style="background: rgba(${rgb},0.15);">★</div>
+        <div class="rank-info">
+          <div class="rank-name">${rank.name}</div>
+          <div class="rank-requirement">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            ${rank.requirement} · Power ${rank.power}
+          </div>
+        </div>
+      </div>
+      <div class="perks-grid" style="grid-template-columns: 1fr;">
+        ${rank.perks.map(p => `
+          <div class="perk-item new-perk">
+            <span class="perk-icon">${p.icon}</span>
+            <span class="perk-text">${p.text}</span>
+            <span class="perk-value">${p.value}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Inject cards
+document.getElementById('ranksTimeline').innerHTML += playerRanks.map((r, i) => renderRankCard(r, i)).join('');
+document.getElementById('staffGrid').innerHTML = staffRanks.map(r => renderStaffCard(r)).join('');
+
+// ===== STARFIELD =====
+(function createStars() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 120; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    star.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${Math.random() * 100}%; top: ${Math.random() * 100}%;
+      --dur: ${2 + Math.random() * 4}s;
+      --o1: ${0.2 + Math.random() * 0.5};
+      --o2: ${0.6 + Math.random() * 0.4};
+      animation-delay: ${Math.random() * 4}s;
+    `;
+    sf.appendChild(star);
+  }
+})();
+
+// ===== FLOATING PARTICLES =====
+(function createParticles() {
+  const colors = ['rgba(77,139,255,0.3)', 'rgba(0,229,255,0.2)', 'rgba(168,85,247,0.25)'];
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 2;
+    p.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${Math.random() * 100}%;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      --dur: ${15 + Math.random() * 25}s;
+      --o: ${0.3 + Math.random() * 0.4};
+      --dx: ${(Math.random() - 0.5) * 200}px;
+      animation-delay: ${Math.random() * 20}s;
+    `;
+    document.body.appendChild(p);
+  }
+})();
+
+// ===== SCROLL ANIMATIONS =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('.rank-card-wrapper, .staff-card').forEach(el => observer.observe(el));
+
+// ===== PROGRESS BAR =====
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+  document.getElementById('progressBar').style.transform = `scaleX(${scrolled})`;
+});
+</script>
 </body>
 </html>
